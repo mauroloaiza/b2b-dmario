@@ -8,6 +8,33 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ---
 
+## [0.6.0] — 2026-06-20 · Sprint 6: Infraestructura de Producción
+
+### Added
+- `GET /api/health` — liveness + readiness con ping de DB (`@nestjs/terminus`)
+- `Dockerfile` multi-stage (builder + producción con usuario no-root `dmario`)
+- `docker-compose.prod.yml` — orquestación completa API + PostgreSQL con healthchecks
+- `api/.dockerignore` — excluye `.env`, `node_modules`, `dist`, logs
+- `src/database/data-source.ts` — DataSource separado para CLI de migrations
+- `src/database/migrations/20260620164610-InitialSchema.ts` — migración baseline del schema Sprint 5
+- Scripts npm: `migration:generate`, `migration:run`, `migration:revert`, `migration:show`
+- Rate limiting global vía `@nestjs/throttler` (120 req / 60 s por IP, configurable via env)
+- `THROTTLE_TTL` y `THROTTLE_LIMIT` en `.env.example`
+- `CORS_ORIGINS` en `.env.example` para lista blanca de orígenes en producción
+
+### Changed
+- `main.ts`: Helmet activado (headers de seguridad HTTP), CORS configurable via `CORS_ORIGINS`
+- `app.module.ts`: TypeORM con `synchronize: false` en producción; migrations path registrado; ThrottlerModule global
+- `.env.example`: documentadas todas las variables de entorno incluyendo las de prod
+
+### Security
+- Helmet: CSP, HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, etc.
+- Rate limiting: 403 automático al superar el límite (ThrottlerGuard global)
+- Docker: imagen de producción corre con usuario no-root
+- `synchronize: false` en NODE_ENV=production previene cambios automáticos de schema
+
+---
+
 ## [0.5.1] — 2026-06-20 · Sprint 5 QA
 
 ### Added

@@ -148,8 +148,40 @@ src/
 | 2 — Comprar | ✅ | Catálogo, `/me`, `/orders/preview`, `/orders` con reglas de negocio |
 | 3 — Cuenta y cartera | ✅ | Historial, recompra en 1 clic, facturas con días de mora |
 | 4 — Pagos PSE | ✅ | Wompi checkout, webhooks, comisión KAM al recaudo |
-| 5 — Panel KAM | ⏳ | Alertas, segmentación 80/20, metas |
-| 6 — Datos reales + QA | ⏳ | 470 clientes, catálogo real, producción |
+| 5 — Panel KAM | ✅ | Alertas, segmentación 80/20, metas, comisiones por periodo |
+| 6 — Producción | ✅ | Helmet, rate limiting, migrations, Dockerfile multi-stage, health check |
+| 7 — Datos reales | ⏳ | 470 clientes, catálogo real, seed de producción |
+
+---
+
+## Despliegue en producción
+
+### 1. Crear `.env.prod` a partir de `.env.example`
+
+```bash
+cp .env.example .env.prod
+# Editar: DB_PASS, BETTER_AUTH_SECRET (≥32 chars), CORS_ORIGINS, claves Wompi
+```
+
+### 2. Construir y levantar
+
+```bash
+docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+```
+
+### 3. Ejecutar migraciones (primera vez)
+
+```bash
+docker compose -f docker-compose.prod.yml exec api node dist/node_modules/typeorm/cli.js \
+  migration:run --dataSource dist/database/data-source.js
+```
+
+### Health check
+
+```
+GET /api/health
+→ { "status": "ok", "info": { "database": { "status": "up" } } }
+```
 
 ---
 
