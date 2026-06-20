@@ -13,6 +13,16 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ---
 
+## [0.2.1] — 2026-06-20 · Sprint 2 QA
+
+### Added
+- `test-report-sprint2.docx`: informe de pruebas Sprint 2 (18/18 PASS) con evidencias, hallazgos y próximos pasos
+
+### Known Issues
+- F-01: `POST /orders/preview` acepta `items: []` y devuelve total $0 sin error de validación — fix aplazado a Sprint 3 (`@ArrayMinSize(1)` en `CreateOrderDto`)
+
+---
+
 ## [0.2.0] — 2026-06-20 · Sprint 2: Comprar
 
 ### Added
