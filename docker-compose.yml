@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: dmario_b2b_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: dmario_b2b
+      POSTGRES_USER: dmario
+      POSTGRES_PASSWORD: dmario_dev_2026
+    ports:
+      - '5435:5432'
+    volumes:
+      - dmario_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U dmario -d dmario_b2b']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  dmario_pgdata:

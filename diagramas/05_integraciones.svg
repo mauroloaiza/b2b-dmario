@@ -1,0 +1,118 @@
+<svg viewBox="0 0 1100 640" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" width="1100" height="640">
+  <rect width="1100" height="640" fill="#f4f6f8"/>
+  <text x="550" y="30" text-anchor="middle" font-size="17" font-weight="bold" fill="#1a1a2e">KHAUTA OTTM — Mecanismos de Integración</text>
+  <text x="550" y="48" text-anchor="middle" font-size="10" fill="#888">Interfaces Banco de la República · Autenticación · Captura Biométrica Morpho MSO 331</text>
+
+  <defs>
+    <marker id="i1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#007CBB"/></marker>
+    <marker id="i2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#d6b656"/></marker>
+    <marker id="i3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#28a745"/></marker>
+    <marker id="i4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#CC3300"/></marker>
+  </defs>
+
+  <!-- CORE CENTER -->
+  <rect x="358" y="220" width="384" height="200" rx="12" fill="white" stroke="#1A73E8" stroke-width="2.5"/>
+  <rect x="358" y="220" width="384" height="34" rx="12" fill="#1A73E8"/>
+  <rect x="358" y="242" width="384" height="12" fill="#1A73E8"/>
+  <text x="550" y="243" text-anchor="middle" font-size="12" font-weight="bold" fill="white">KHAUTA OTTM — Núcleo</text>
+  <text x="550" y="274" text-anchor="middle" font-size="10" fill="#333">Servidor de Aplicación · EC2 · Docker</text>
+  <text x="550" y="292" text-anchor="middle" font-size="9" fill="#555">Motor de negocio · Orquestador de integraciones</text>
+  <text x="550" y="308" text-anchor="middle" font-size="9" fill="#555">API REST · HTTPS/TLS 1.2+ · Auth token</text>
+  <text x="550" y="324" text-anchor="middle" font-size="9" fill="#555">Logs trazabilidad → CloudWatch · S3 Object Lock</text>
+  <text x="550" y="340" text-anchor="middle" font-size="9" fill="#555">Credenciales → Secrets Manager / KMS</text>
+  <text x="550" y="358" text-anchor="middle" font-size="9" fill="#555">Salida externa via NAT Gateway · IP fija (whitelist)</text>
+  <text x="550" y="376" text-anchor="middle" font-size="9" fill="#555">RDS MySQL · WAF · Shield · IAM</text>
+  <text x="550" y="394" text-anchor="middle" font-size="9" fill="#555">Timeout + reintentos configurables</text>
+
+  <!-- LEFT: BANCO DE LA REPÚBLICA -->
+  <rect x="28" y="58" width="278" height="524" rx="10" fill="#e6f4fb" stroke="#007CBB" stroke-width="2"/>
+  <rect x="28" y="46" width="210" height="22" rx="5" fill="#007CBB"/>
+  <text x="133" y="61" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Banco de la República</text>
+
+  <rect x="44" y="72" width="246" height="64" rx="7" fill="white" stroke="#007CBB" stroke-width="1.5"/>
+  <text x="167" y="93" text-anchor="middle" font-size="10" font-weight="bold" fill="#007CBB">Funcionarios / Operadores</text>
+  <text x="167" y="109" text-anchor="middle" font-size="9" fill="#555">Estación Windows 11 · Chrome/Edge</text>
+  <text x="167" y="123" text-anchor="middle" font-size="9" fill="#555">HTTPS · MFA (TOTP)</text>
+
+  <rect x="44" y="148" width="246" height="64" rx="7" fill="white" stroke="#007CBB" stroke-width="1.5"/>
+  <text x="167" y="169" text-anchor="middle" font-size="10" font-weight="bold" fill="#007CBB">Sistemas Internos Banco</text>
+  <text x="167" y="185" text-anchor="middle" font-size="9" fill="#555">API REST / Servicios web</text>
+  <text x="167" y="199" text-anchor="middle" font-size="9" fill="#555">Intercambio datos operativos</text>
+
+  <rect x="44" y="224" width="246" height="64" rx="7" fill="white" stroke="#007CBB" stroke-width="1.5"/>
+  <text x="167" y="245" text-anchor="middle" font-size="10" font-weight="bold" fill="#007CBB">Herramientas de Monitoreo</text>
+  <text x="167" y="261" text-anchor="middle" font-size="9" fill="#555">Integración con plataformas banco</text>
+  <text x="167" y="275" text-anchor="middle" font-size="9" fill="#555">Métricas CloudWatch · API estado</text>
+
+  <rect x="44" y="300" width="246" height="64" rx="7" fill="white" stroke="#007CBB" stroke-width="1.5"/>
+  <text x="167" y="321" text-anchor="middle" font-size="10" font-weight="bold" fill="#007CBB">SMTP Corporativo Banco</text>
+  <text x="167" y="337" text-anchor="middle" font-size="9" fill="#555">Notificaciones y alertas</text>
+  <text x="167" y="351" text-anchor="middle" font-size="9" fill="#555">Confirmaciones operativas</text>
+
+  <rect x="44" y="376" width="246" height="64" rx="7" fill="white" stroke="#007CBB" stroke-width="1.5"/>
+  <text x="167" y="397" text-anchor="middle" font-size="10" font-weight="bold" fill="#007CBB">SIEM / Auditoría Banco</text>
+  <text x="167" y="413" text-anchor="middle" font-size="9" fill="#555">Exportación logs de auditoría</text>
+  <text x="167" y="427" text-anchor="middle" font-size="9" fill="#555">Trazabilidad · Cumplimiento</text>
+
+  <rect x="44" y="452" width="246" height="118" rx="7" fill="#dbeeff" stroke="#007CBB" stroke-width="1"/>
+  <text x="167" y="472" text-anchor="middle" font-size="9" font-weight="bold" fill="#007CBB">Protocolo</text>
+  <text x="167" y="488" text-anchor="middle" font-size="8" fill="#555">Canal: HTTPS TLS 1.2+</text>
+  <text x="167" y="502" text-anchor="middle" font-size="8" fill="#555">Auth: token / credencial</text>
+  <text x="167" y="516" text-anchor="middle" font-size="8" fill="#555">IP Whitelisting habilitado</text>
+  <text x="167" y="530" text-anchor="middle" font-size="8" fill="#555">Log de cada llamada</text>
+  <text x="167" y="544" text-anchor="middle" font-size="8" fill="#555">Reintentos con backoff</text>
+  <text x="167" y="558" text-anchor="middle" font-size="8" fill="#555">Segregación por roles</text>
+
+  <!-- RIGHT: PROVEEDORES / EXTERNOS -->
+  <rect x="794" y="58" width="278" height="524" rx="10" fill="#fff3e0" stroke="#FF9900" stroke-width="2"/>
+  <rect x="794" y="46" width="230" height="22" rx="5" fill="#FF9900"/>
+  <text x="909" y="61" text-anchor="middle" font-size="11" font-weight="bold" fill="white">Servicios Externos</text>
+
+  <rect x="810" y="72" width="246" height="80" rx="7" fill="white" stroke="#28a745" stroke-width="2"/>
+  <text x="933" y="93" text-anchor="middle" font-size="10" font-weight="bold" fill="#28a745">Captor Biométrico</text>
+  <text x="933" y="109" text-anchor="middle" font-size="10" font-weight="bold" fill="#28a745">Morpho MSO 331</text>
+  <text x="933" y="125" text-anchor="middle" font-size="9" fill="#555">Driver Windows 11+ en endpoint</text>
+  <text x="933" y="139" text-anchor="middle" font-size="9" fill="#555">Captura huella dactilar local</text>
+
+  <rect x="810" y="164" width="246" height="64" rx="7" fill="white" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="933" y="185" text-anchor="middle" font-size="10" font-weight="bold" fill="#7a6000">Proveedor Biométrico API</text>
+  <text x="933" y="201" text-anchor="middle" font-size="9" fill="#555">Validación de identidad</text>
+  <text x="933" y="215" text-anchor="middle" font-size="9" fill="#555">API REST · HTTPS · Token</text>
+
+  <rect x="810" y="240" width="246" height="64" rx="7" fill="white" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="933" y="261" text-anchor="middle" font-size="10" font-weight="bold" fill="#7a6000">MFA — TOTP</text>
+  <text x="933" y="277" text-anchor="middle" font-size="9" fill="#555">Google / Microsoft Authenticator</text>
+  <text x="933" y="291" text-anchor="middle" font-size="9" fill="#555">Estándar TOTP/HOTP · RFC 6238</text>
+
+  <rect x="810" y="316" width="246" height="64" rx="7" fill="white" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="933" y="337" text-anchor="middle" font-size="10" font-weight="bold" fill="#7a6000">AWS SES / SNS</text>
+  <text x="933" y="353" text-anchor="middle" font-size="9" fill="#555">Email transaccional</text>
+  <text x="933" y="367" text-anchor="middle" font-size="9" fill="#555">Notificaciones / Alertas</text>
+
+  <rect x="810" y="392" width="246" height="64" rx="7" fill="white" stroke="#d6b656" stroke-width="1.5"/>
+  <text x="933" y="413" text-anchor="middle" font-size="10" font-weight="bold" fill="#7a6000">CloudWatch / GuardDuty</text>
+  <text x="933" y="429" text-anchor="middle" font-size="9" fill="#555">Monitoreo infraestructura</text>
+  <text x="933" y="443" text-anchor="middle" font-size="9" fill="#555">Detección amenazas · Alarmas</text>
+
+  <rect x="810" y="468" width="246" height="102" rx="7" fill="#fff3e0" stroke="#FF9900" stroke-width="1"/>
+  <text x="933" y="488" text-anchor="middle" font-size="9" font-weight="bold" fill="#FF9900">Protocolo</text>
+  <text x="933" y="504" text-anchor="middle" font-size="8" fill="#555">Canal: HTTPS TLS 1.2+</text>
+  <text x="933" y="518" text-anchor="middle" font-size="8" fill="#555">Salida via NAT Gateway</text>
+  <text x="933" y="532" text-anchor="middle" font-size="8" fill="#555">IP Elástica fija (whitelist)</text>
+  <text x="933" y="546" text-anchor="middle" font-size="8" fill="#555">Credenciales: Secrets Manager</text>
+  <text x="933" y="560" text-anchor="middle" font-size="8" fill="#555">Timeout + reintento configurable</text>
+
+  <!-- Arrows LEFT → CORE -->
+  <line x1="290" y1="104" x2="358" y2="300" stroke="#007CBB" stroke-width="1.5" marker-end="url(#i1)"/>
+  <line x1="290" y1="180" x2="358" y2="310" stroke="#007CBB" stroke-width="1.5" marker-end="url(#i1)"/>
+  <line x1="290" y1="256" x2="358" y2="320" stroke="#007CBB" stroke-width="1.5" marker-end="url(#i1)"/>
+  <line x1="290" y1="332" x2="358" y2="330" stroke="#007CBB" stroke-width="1.5" marker-end="url(#i1)"/>
+  <line x1="290" y1="408" x2="358" y2="340" stroke="#007CBB" stroke-width="1.5" marker-end="url(#i1)"/>
+
+  <!-- Arrows CORE → RIGHT -->
+  <line x1="742" y1="300" x2="810" y2="112" stroke="#28a745" stroke-width="2" stroke-dasharray="5,3" marker-end="url(#i3)"/>
+  <line x1="742" y1="310" x2="810" y2="196" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#i2)"/>
+  <line x1="742" y1="320" x2="810" y2="272" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#i2)"/>
+  <line x1="742" y1="330" x2="810" y2="348" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#i2)"/>
+  <line x1="742" y1="340" x2="810" y2="424" stroke="#d6b656" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#i2)"/>
+</svg>

@@ -1,0 +1,115 @@
+<svg viewBox="0 0 1100 820" xmlns="http://www.w3.org/2000/svg" font-family="Arial, sans-serif" width="1100" height="820">
+  <rect width="1100" height="820" fill="#f4f6f8"/>
+  <text x="550" y="30" text-anchor="middle" font-size="17" font-weight="bold" fill="#1a1a2e">KHAUTA OTTM — Componentes y Arquitectura de Red</text>
+  <text x="550" y="48" text-anchor="middle" font-size="10" fill="#888">VPC · Subnets · WAF · Shield · Security Groups · AWS us-east-1</text>
+
+  <!-- Internet -->
+  <rect x="360" y="62" width="380" height="44" rx="8" fill="#e8e8e8" stroke="#aaa" stroke-width="1.5"/>
+  <text x="550" y="82" text-anchor="middle" font-size="11" font-weight="bold" fill="#333">Internet — Usuarios Banco de la República</text>
+  <text x="550" y="98" text-anchor="middle" font-size="9" fill="#666">Estaciones Windows 11 · Chrome / Edge · Morpho MSO 331</text>
+
+  <!-- WAF -->
+  <rect x="190" y="126" width="200" height="46" rx="8" fill="#fff0f0" stroke="#CC3300" stroke-width="2"/>
+  <text x="290" y="147" text-anchor="middle" font-size="11" font-weight="bold" fill="#900">AWS WAF</text>
+  <text x="290" y="163" text-anchor="middle" font-size="9" fill="#900">Filtrado tráfico malicioso · OWASP Top 10</text>
+  <!-- Shield -->
+  <rect x="710" y="126" width="200" height="46" rx="8" fill="#fff0f0" stroke="#CC3300" stroke-width="2"/>
+  <text x="810" y="147" text-anchor="middle" font-size="11" font-weight="bold" fill="#900">AWS Shield</text>
+  <text x="810" y="163" text-anchor="middle" font-size="9" fill="#900">Protección Anti-DDoS</text>
+
+  <!-- AWS Cloud -->
+  <rect x="40" y="192" width="1020" height="590" rx="12" fill="none" stroke="#FF9900" stroke-width="2.5" stroke-dasharray="10,5"/>
+  <rect x="40" y="180" width="90" height="20" rx="4" fill="#FF9900"/>
+  <text x="85" y="194" text-anchor="middle" font-size="10" font-weight="bold" fill="white">AWS Cloud</text>
+
+  <!-- VPC -->
+  <rect x="60" y="206" width="980" height="566" rx="10" fill="none" stroke="#8C4FFF" stroke-width="1.5" stroke-dasharray="6,4"/>
+  <text x="78" y="222" font-size="10" font-weight="bold" fill="#8C4FFF">VPC — 10.0.0.0/16</text>
+
+  <!-- IGW -->
+  <rect x="420" y="232" width="260" height="38" rx="7" fill="#f0eaff" stroke="#8C4FFF" stroke-width="1.5"/>
+  <text x="550" y="248" text-anchor="middle" font-size="10" font-weight="bold" fill="#5b00c8">Internet Gateway</text>
+  <text x="550" y="262" text-anchor="middle" font-size="9" fill="#7a5cc8">Punto de entrada a la VPC</text>
+
+  <!-- Public Subnet AZ-a -->
+  <rect x="78" y="288" width="448" height="196" rx="8" fill="#e6f4fb" stroke="#007CBB" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="96" y="304" font-size="10" font-weight="bold" fill="#007CBB">Subred Pública — AZ us-east-1a  (10.0.1.0/24)</text>
+  <!-- ALB -->
+  <rect x="96" y="312" width="412" height="58" rx="7" fill="white" stroke="#FF9900" stroke-width="2"/>
+  <rect x="96" y="312" width="412" height="26" rx="7" fill="#FF9900"/>
+  <rect x="96" y="326" width="412" height="12" fill="#FF9900"/>
+  <text x="302" y="328" text-anchor="middle" font-size="10" font-weight="bold" fill="white">Application Load Balancer — HTTPS 443 · ACM SSL</text>
+  <text x="302" y="350" text-anchor="middle" font-size="9" fill="#555">SG: inbound 443 solo desde internet · outbound al SG del EC2</text>
+  <text x="302" y="363" text-anchor="middle" font-size="9" fill="#555">Health checks · Target Group EC2 · Logs en S3</text>
+  <!-- NAT GW -->
+  <rect x="96" y="382" width="412" height="90" rx="7" fill="white" stroke="#8C4FFF" stroke-width="1.5"/>
+  <text x="302" y="401" text-anchor="middle" font-size="10" font-weight="bold" fill="#5b00c8">NAT Gateway — IP Elástica fija</text>
+  <text x="302" y="417" text-anchor="middle" font-size="9" fill="#555">Salida controlada a internet (proveedores externos)</text>
+  <text x="302" y="432" text-anchor="middle" font-size="9" fill="#555">IP fija para whitelisting en proveedores biométricos</text>
+  <text x="302" y="447" text-anchor="middle" font-size="9" fill="#555">Outbound: solo HTTPS 443 · credenciales via Secrets Manager</text>
+  <text x="302" y="462" text-anchor="middle" font-size="9" fill="#555">Trazabilidad: VPC Flow Logs habilitados</text>
+
+  <!-- Public Subnet AZ-b -->
+  <rect x="574" y="288" width="446" height="196" rx="8" fill="#e6f4fb" stroke="#007CBB" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="592" y="304" font-size="10" font-weight="bold" fill="#007CBB">Subred Pública — AZ us-east-1b  (10.0.2.0/24)</text>
+  <rect x="590" y="312" width="412" height="58" rx="7" fill="white" stroke="#FF9900" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="796" y="336" text-anchor="middle" font-size="10" fill="#aaa">ALB — Nodo HA secundario</text>
+  <text x="796" y="352" text-anchor="middle" font-size="9" fill="#bbb">Alta disponibilidad Multi-AZ</text>
+  <rect x="590" y="382" width="412" height="90" rx="7" fill="#f9f9f9" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="796" y="420" text-anchor="middle" font-size="10" fill="#aaa">Bastion Host (acceso SSH restringido)</text>
+  <text x="796" y="436" text-anchor="middle" font-size="9" fill="#bbb">SG: 22 solo IPs autorizadas · MFA requerido</text>
+  <text x="796" y="452" text-anchor="middle" font-size="9" fill="#bbb">Acceso via VPN cuando aplique</text>
+
+  <!-- Private Subnet App AZ-a -->
+  <rect x="78" y="502" width="448" height="122" rx="8" fill="#fff0e8" stroke="#CC3300" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="96" y="518" font-size="10" font-weight="bold" fill="#CC3300">Subred Privada App — AZ us-east-1a  (10.0.3.0/24)</text>
+  <rect x="96" y="526" width="412" height="86" rx="7" fill="white" stroke="#1A73E8" stroke-width="2"/>
+  <rect x="96" y="526" width="412" height="24" rx="7" fill="#1A73E8"/>
+  <rect x="96" y="538" width="412" height="12" fill="#1A73E8"/>
+  <text x="302" y="542" text-anchor="middle" font-size="10" font-weight="bold" fill="white">EC2 — Servidor de Aplicación (t3.medium+)</text>
+  <text x="302" y="564" text-anchor="middle" font-size="9" fill="#555">Docker: contenedor App KHAUTA OTTM + Nginx</text>
+  <text x="302" y="578" text-anchor="middle" font-size="9" fill="#555">SG inbound: 80/443 solo desde SG del ALB</text>
+  <text x="302" y="592" text-anchor="middle" font-size="9" fill="#555">SG outbound: 443 via NAT · 3306 a SG RDS · CloudWatch</text>
+  <text x="302" y="606" text-anchor="middle" font-size="9" fill="#555">SSH: solo desde SG Bastion · EBS cifrado KMS</text>
+
+  <!-- Private Subnet DB AZ-a -->
+  <rect x="78" y="642" width="448" height="102" rx="8" fill="#e0f7f4" stroke="#00758F" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="96" y="658" font-size="10" font-weight="bold" fill="#00758F">Subred Datos — AZ us-east-1a  (10.0.5.0/24)</text>
+  <rect x="96" y="666" width="412" height="68" rx="7" fill="white" stroke="#00758F" stroke-width="2"/>
+  <rect x="96" y="666" width="412" height="22" rx="7" fill="#00758F"/>
+  <rect x="96" y="678" width="412" height="10" fill="#00758F"/>
+  <text x="302" y="681" text-anchor="middle" font-size="10" font-weight="bold" fill="white">RDS MySQL — Primary (db.t3.medium)</text>
+  <text x="302" y="702" text-anchor="middle" font-size="9" fill="#555">SG: 3306 solo desde SG del EC2 · Sin acceso público</text>
+  <text x="302" y="716" text-anchor="middle" font-size="9" fill="#555">Cifrado AES-256 / KMS · Backup 30 días · Multi-AZ</text>
+  <text x="302" y="730" text-anchor="middle" font-size="9" fill="#555">Logs: RDS Enhanced Monitoring → CloudWatch</text>
+
+  <!-- Private Subnet App AZ-b -->
+  <rect x="574" y="502" width="446" height="122" rx="8" fill="#fff0e8" stroke="#CC3300" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="592" y="518" font-size="10" font-weight="bold" fill="#CC3300">Subred Privada App — AZ us-east-1b  (10.0.4.0/24)</text>
+  <rect x="590" y="526" width="412" height="86" rx="7" fill="#f9f9f9" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="796" y="560" text-anchor="middle" font-size="10" fill="#aaa">EC2 — Auto Scaling (horizontal)</text>
+  <text x="796" y="576" text-anchor="middle" font-size="9" fill="#bbb">Misma configuración que AZ-a</text>
+  <text x="796" y="592" text-anchor="middle" font-size="9" fill="#bbb">Activo en caso de falla o alta demanda</text>
+
+  <!-- Private Subnet DB AZ-b -->
+  <rect x="574" y="642" width="446" height="102" rx="8" fill="#e0f7f4" stroke="#00758F" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="592" y="658" font-size="10" font-weight="bold" fill="#00758F">Subred Datos — AZ us-east-1b  (10.0.6.0/24)</text>
+  <rect x="590" y="666" width="412" height="68" rx="7" fill="#f9f9f9" stroke="#ccc" stroke-width="1" stroke-dasharray="3,3"/>
+  <text x="796" y="700" text-anchor="middle" font-size="10" fill="#aaa">RDS MySQL — Standby Multi-AZ</text>
+  <text x="796" y="716" text-anchor="middle" font-size="9" fill="#bbb">Réplica síncrona · Failover automático</text>
+  <text x="796" y="730" text-anchor="middle" font-size="9" fill="#bbb">Mismas políticas de cifrado y backup</text>
+
+  <!-- Arrows -->
+  <defs>
+    <marker id="r1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#CC3300"/></marker>
+    <marker id="r2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#555"/></marker>
+    <marker id="r3" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3 z" fill="#1A73E8"/></marker>
+  </defs>
+  <line x1="460" y1="106" x2="290" y2="126" stroke="#CC3300" stroke-width="1.5" marker-end="url(#r1)"/>
+  <line x1="640" y1="106" x2="810" y2="126" stroke="#CC3300" stroke-width="1.5" marker-end="url(#r1)"/>
+  <line x1="290" y1="172" x2="480" y2="232" stroke="#555" stroke-width="1.5" marker-end="url(#r2)"/>
+  <line x1="810" y1="172" x2="620" y2="232" stroke="#555" stroke-width="1.5" marker-end="url(#r2)"/>
+  <line x1="550" y1="270" x2="302" y2="312" stroke="#FF9900" stroke-width="1.5" marker-end="url(#r2)"/>
+  <line x1="302" y1="370" x2="302" y2="526" stroke="#1A73E8" stroke-width="1.5" marker-end="url(#r3)"/>
+  <line x1="302" y1="612" x2="302" y2="666" stroke="#00758F" stroke-width="1.5" marker-end="url(#r2)"/>
+</svg>

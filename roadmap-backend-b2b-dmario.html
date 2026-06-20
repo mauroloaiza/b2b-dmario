@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Roadmap Backend · Proyecto B2B D'MARIO</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #F4F2EC;
+    color: #1A1F1D;
+    padding: 28px 24px 40px;
+    font-size: 13px;
+  }
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Georgia', serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: #183029;
+  }
+  .badge-project {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    background: #183029;
+    color: #F4F2EC;
+    padding: 3px 9px;
+    border-radius: 2px;
+  }
+  .subtitle {
+    font-size: 12.5px;
+    color: #585A59;
+    margin-bottom: 24px;
+  }
+
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .sum-card {
+    background: #fff;
+    border: 1px solid #E3E0D7;
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .sum-label { font-size: 10.5px; color: #8A8D8B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  .sum-value { font-size: 20px; font-weight: 700; color: #183029; font-family: 'Georgia', serif; }
+  .sum-sub { font-size: 11px; color: #8A8D8B; margin-top: 2px; }
+
+  .sprint-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .sprint {
+    background: #fff;
+    border: 1px solid #E3E0D7;
+    border-radius: 4px;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 200px 1fr 180px;
+  }
+  .sprint-left {
+    padding: 18px 20px;
+    border-right: 1px solid #E3E0D7;
+    background: #FAF8F2;
+  }
+  .sprint-num {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #8A8D8B;
+    margin-bottom: 4px;
+  }
+  .sprint-name {
+    font-family: 'Georgia', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #183029;
+    margin-bottom: 6px;
+    line-height: 1.2;
+  }
+  .sprint-time {
+    font-size: 11.5px;
+    color: #585A59;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .sprint-time::before { content: '⏱'; font-size: 11px; }
+  .sprint-body { padding: 18px 20px; }
+  .sprint-tasks { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .task { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: #1A1F1D; line-height: 1.4; }
+  .task-dot { width: 5px; height: 5px; border-radius: 50%; background: #183029; margin-top: 5px; flex-shrink: 0; }
+  .sprint-done {
+    font-size: 11px; color: #2F7D55; font-weight: 600;
+    padding: 7px 10px; background: #DCEAE1; border-radius: 3px;
+    display: inline-block; margin-top: 4px;
+  }
+  .sprint-right {
+    padding: 18px 16px;
+    border-left: 1px solid #E3E0D7;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-end; gap: 6px;
+  }
+  .sprint-pct { font-size: 11px; font-weight: 700; color: #8A8D8B; letter-spacing: 0.1em; }
+  .sprint-price { font-family: 'Georgia', serif; font-size: 19px; font-weight: 700; color: #183029; }
+  .sprint-desc { font-size: 10.5px; color: #8A8D8B; text-align: right; line-height: 1.4; }
+
+  .sprint.s1 { border-left: 3px solid #183029; }
+  .sprint.s2 { border-left: 3px solid #244A3D; }
+  .sprint.s3 { border-left: 3px solid #2F7D55; }
+  .sprint.s4 { border-left: 3px solid #E75300; }
+  .sprint.s5 { border-left: 3px solid #58595B; }
+  .sprint.s6 { border-left: 3px solid #A23314; }
+
+  .costs-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  .costs-card {
+    background: #fff;
+    border: 1px solid #E3E0D7;
+    border-radius: 4px;
+    padding: 18px 20px;
+  }
+  .costs-title {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8A8D8B; margin-bottom: 12px;
+  }
+  .cost-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 6px 0; border-bottom: 1px solid #F4F2EC; font-size: 12.5px;
+  }
+  .cost-row:last-child { border-bottom: none; }
+  .cost-row .label { color: #585A59; }
+  .cost-row .amount { font-weight: 600; color: #1A1F1D; font-family: 'Georgia', serif; font-size: 13.5px; }
+  .cost-row.total-row .label { font-weight: 700; color: #183029; }
+  .cost-row.total-row .amount { color: #183029; font-size: 16px; }
+
+  .timeline-section {
+    background: #fff;
+    border: 1px solid #E3E0D7;
+    border-radius: 4px;
+    padding: 18px 20px;
+    margin-bottom: 24px;
+  }
+  .timeline-title {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8A8D8B; margin-bottom: 14px;
+  }
+  .timeline-bar {
+    display: grid;
+    grid-template-columns: 3fr 4fr 3fr 3fr 3fr 4fr;
+    gap: 3px; margin-bottom: 8px;
+  }
+  .tbar-seg {
+    height: 28px; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 700; color: #fff; border-radius: 2px;
+  }
+  .tbar-seg.s1 { background: #183029; }
+  .tbar-seg.s2 { background: #244A3D; }
+  .tbar-seg.s3 { background: #2F7D55; }
+  .tbar-seg.s4 { background: #E75300; }
+  .tbar-seg.s5 { background: #58595B; }
+  .tbar-seg.s6 { background: #A23314; }
+  .timeline-pilot {
+    margin-top: 10px; padding: 10px 12px;
+    background: #FBE3D5; border-radius: 3px;
+    border-left: 3px solid #E75300;
+    font-size: 12px; color: #1A1F1D;
+  }
+  .timeline-pilot strong { color: #A23314; }
+
+  .warnings { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+  .warn-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 14px; background: #FBE3D5;
+    border-radius: 3px; border-left: 3px solid #E75300;
+    font-size: 12.5px; color: #1A1F1D;
+  }
+  .warn-item.info { background: #DCEAE1; border-left-color: #2F7D55; }
+  .warn-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  .total-footer {
+    background: #183029; border-radius: 4px; padding: 20px 24px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .tf-left .tf-label { font-size: 11px; color: rgba(244,242,236,0.6); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 4px; }
+  .tf-left .tf-name { font-size: 15px; color: #F4F2EC; font-weight: 600; }
+  .tf-right { text-align: right; }
+  .tf-right .tf-label { font-size: 11px; color: rgba(244,242,236,0.6); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 4px; }
+  .tf-right .tf-total { font-family: 'Georgia', serif; font-size: 30px; color: #F4F2EC; font-weight: 700; }
+  .tf-right .tf-sub { font-size: 11px; color: rgba(244,242,236,0.55); margin-top: 2px; }
+
+  .section-title {
+    font-size: 10.5px; font-weight: 700;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: #8A8D8B; margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Proyecto B2B D'MARIO</h1>
+  <span class="badge-project">Backend MVP</span>
+</div>
+<div class="subtitle">Roadmap de desarrollo · Portal Mayorista Colombia · Fase 1 — Piloto 10–15 aliados</div>
+
+<div class="summary">
+  <div class="sum-card">
+    <div class="sum-label">Sprints</div>
+    <div class="sum-value">6</div>
+    <div class="sum-sub">Fases de construcción</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Duración build</div>
+    <div class="sum-value">5–7 sem</div>
+    <div class="sum-sub">Vibe coding full-time</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Piloto post-build</div>
+    <div class="sum-value">8 sem</div>
+    <div class="sum-sub">10–15 aliados reales</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Inversión infra + tools</div>
+    <div class="sum-value">$3.19M</div>
+    <div class="sum-sub">COP · año 1</div>
+  </div>
+</div>
+
+<div class="section-title" style="margin-bottom:10px;">Plan de construcción</div>
+<div class="sprint-grid">
+
+  <div class="sprint s1">
+    <div class="sprint-left">
+      <div class="sprint-num">Sprint 1</div>
+      <div class="sprint-name">Cimientos</div>
+      <div class="sprint-time">3–4 días</div>
+    </div>
+    <div class="sprint-body">
+      <div class="sprint-tasks">
+        <div class="task"><div class="task-dot"></div>Setup: NestJS + PostgreSQL + Supabase Auth</div>
+        <div class="task"><div class="task-dot"></div>Tablas: products, clients, users, orders, order_items, invoices</div>
+        <div class="task"><div class="task-dot"></div>Seed con data.jsx (12 productos, 9 clientes, 4 KAMs)</div>
+        <div class="task"><div class="task-dot"></div>JWT con roles aliado / KAM — rutas protegidas</div>
+        <div class="task"><div class="task-dot"></div>POST /auth/login → token + rol</div>
+      </div>
+      <span class="sprint-done">✓ Un usuario entra y ve su rol</span>
+    </div>
+    <div class="sprint-right">
+      <div class="sprint-pct">25%</div>
+      <div class="sprint-price">$4,750,000</div>
+      <div class="sprint-desc">Pago al iniciar</div>
+    </div>
+  </div>
+
+  <div class="sprint s2">
+    <div class="sprint-left">
+      <div class="sprint-num">Sprint 2</div>
+      <div class="sprint-name">Comprar</div>
+      <div class="sprint-time">4–5 días</div>
+    </div>
+    <div class="sprint-body">
+      <div class="sprint-tasks">
+        <div class="task"><div class="task-dot"></div>GET /catalog — filtros por línea + búsqueda, stock real</div>
+        <div class="task"><div class="task-dot"></div>GET /me — cupo disponible, usado, vendedor asignado</div>
+        <div class="task"><div class="task-dot"></div>POST /orders/preview — subtotal, descuento, total, validación cupo</div>
+        <div class="task"><div class="task-dot"></div>POST /orders — confirmar: descuenta stock, suma cupo, genera factura</div>
+        <div class="task"><div class="task-dot"></div>Reglas: −8% contado / −5% pronto pago / 0% crédito 90d</div>
+        <div class="task"><div class="task-dot"></div>Bloqueo si total > cupo disponible (solo crédito 90d)</div>
+      </div>
+      <span class="sprint-done">✓ Aliado arma y confirma un pedido real</span>
+    </div>
+    <div class="sprint-right">
+      <div class="sprint-pct">20%</div>
+      <div class="sprint-price">$3,800,000</div>
+      <div class="sprint-desc">Pago al entregar</div>
+    </div>
+  </div>
+
+  <div class="sprint s3">
+    <div class="sprint-left">
+      <div class="sprint-num">Sprint 3</div>
+      <div class="sprint-name">Cuenta y cartera</div>
+      <div class="sprint-time">3–4 días</div>
+    </div>
+    <div class="sprint-body">
+      <div class="sprint-tasks">
+        <div class="task"><div class="task-dot"></div>GET /orders — historial del aliado con estados</div>
+        <div class="task"><div class="task-dot"></div>POST /orders/:id/repeat — recompra en 1 clic</div>
+        <div class="task"><div class="task-dot"></div>GET /invoices/me — facturas, vencimientos, estado pronto pago</div>
+        <div class="task"><div class="task-dot"></div>Lógica pronto pago: −5% sobre factura si paga antes del día 30</div>
+        <div class="task"><div class="task-dot"></div>PVP sugerido: round(price_mayo × 1.35 / 100) × 100</div>
+      </div>
+      <span class="sprint-done">✓ Aliado ve historial y repite pedidos</span>
+    </div>
+    <div class="sprint-right">
+      <div class="sprint-pct">15%</div>
+      <div class="sprint-price">$2,850,000</div>
+      <div class="sprint-desc">Pago al entregar</div>
+    </div>
+  </div>
+
+  <div class="sprint s4">
+    <div class="sprint-left">
+      <div class="sprint-num">Sprint 4</div>
+      <div class="sprint-name">Pagos PSE</div>
+      <div class="sprint-time">3–4 días</div>
+    </div>
+    <div class="sprint-body">
+      <div class="sprint-tasks">
+        <div class="task"><div class="task-dot"></div>Integración Wompi / PayU — flujo PSE Colombia</div>
+        <div class="task"><div class="task-dot"></div>Webhook de pago confirmado → marca factura pagada</div>
+        <div class="task"><div class="task-dot"></div>Comisión 3% al recaudo: solo si paid_at ≤ due_date</div>
+        <div class="task"><div class="task-dot"></div>Registro de comisiones por vendedor</div>
+        <div class="task"><div class="task-dot"></div>Email transaccional: confirmación de pedido + comprobante</div>
+      </div>
+      <span class="sprint-done">✓ Un pedido se paga de verdad</span>
+    </div>
+    <div class="sprint-right">
+      <div class="sprint-pct">20%</div>
+      <div class="sprint-price">$3,800,000</div>
+      <div class="sprint-desc">Pago al entregar</div>
+    </div>
+  </div>
+
+  <div class="sprint s5">
+    <div class="sprint-left">
+      <div class="sprint-num">Sprint 5</div>
+      <div class="sprint-name">Panel KAM</div>
+      <div class="sprint-time">3–4 días</div>
+    </div>
+    <div class="sprint-body">
+      <div class="sprint-tasks">
+        <div class="task"><div class="task-dot"></div>GET /vendor/me — meta del mes, % cumplimiento, comisión acumulada</div>
+        <div class="task"><div class="task-dot"></div>GET /vendor/clients — segmento, YTD, última compra, % cupo usado</div>
+        <div class="task"><div class="task-dot"></div>GET /vendor/alerts — clientes en riesgo/inactivos con motivo</div>
+        <div class="task"><div class="task-dot"></div>Job nocturno: recalcular segment A/B/C + status riesgo/inactivo</div>
+        <div class="task"><div class="task-dot"></div>Segmento A = top 20% clientes que acumulan 80% de venta</div>
+        <div class="task"><div class="task-dot"></div>Riesgo = rompió frecuencia habitual · Inactivo = 30+ días sin comprar</div>
+      </div>
+      <span class="sprint-done">✓ KAM sabe a quién llamar hoy</span>
+    </div>
+    <div class="sprint-right">
+      <div class="sprint-pct">10%</div>
+      <div class="sprint-price">$1,900,000</div>
+      <div class="sprint-desc">Pago al entregar</div>
+    </div>
+  </div>
+
+  <div class="sprint s6">
+    <div class="sprint-left">
+      <div class="sprint-num">Sprint 6</div>
+      <div class="sprint-name">Datos reales + QA</div>
+      <div class="sprint-time">4–6 días</div>
+    </div>
+    <div class="sprint-body">
+      <div class="sprint-tasks">
+        <div class="task"><div class="task-dot"></div>Migración: 470 clientes reales + cupos asignados</div>
+        <div class="task"><div class="task-dot"></div>Carga del catálogo real con fotos de producto</div>
+        <div class="task"><div class="task-dot"></div>Ambiente staging → producción</div>
+        <div class="task"><div class="task-dot"></div>QA de todas las reglas comerciales (descuentos, cupos, comisiones)</div>
+        <div class="task"><div class="task-dot"></div>Documentación API (Swagger) para continuidad</div>
+        <div class="task"><div class="task-dot"></div>Capacitación a KAMs piloto (1–2 vendedores)</div>
+      </div>
+      <span class="sprint-done">✓ Listo para el piloto con aliados reales</span>
+    </div>
+    <div class="sprint-right">
+      <div class="sprint-pct">10%</div>
+      <div class="sprint-price">$1,900,000</div>
+      <div class="sprint-desc">Pago al go-live</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-title">Desglose de costos</div>
+<div class="costs-section">
+  <div class="costs-card">
+    <div class="costs-title">Herramientas de desarrollo</div>
+    <div class="cost-row"><span class="label">Honorarios de desarrollo</span><span class="amount">Negociado aparte</span></div>
+    <div class="cost-row"><span class="label">Cursor Pro (2 meses)</span><span class="amount">$160,000</span></div>
+    <div class="cost-row"><span class="label">Claude API — desarrollo</span><span class="amount">$200,000</span></div>
+    <div class="cost-row total-row"><span class="label">Subtotal herramientas build</span><span class="amount">$360,000</span></div>
+  </div>
+  <div class="costs-card">
+    <div class="costs-title">Infraestructura primer año</div>
+    <div class="cost-row"><span class="label">Supabase Pro (12 meses)</span><span class="amount">$1,248,000</span></div>
+    <div class="cost-row"><span class="label">Railway/Render backend</span><span class="amount">$996,000</span></div>
+    <div class="cost-row"><span class="label">Email transaccional — Resend</span><span class="amount">$504,000</span></div>
+    <div class="cost-row"><span class="label">Dominio</span><span class="amount">$84,000</span></div>
+    <div class="cost-row total-row"><span class="label">Subtotal infra año 1</span><span class="amount">$2,832,000</span></div>
+  </div>
+</div>
+
+<div class="timeline-section">
+  <div class="timeline-title">Línea de tiempo · semanas</div>
+  <div class="timeline-bar">
+    <div class="tbar-seg s1">S1</div>
+    <div class="tbar-seg s2">S2</div>
+    <div class="tbar-seg s3">S3</div>
+    <div class="tbar-seg s4">S4</div>
+    <div class="tbar-seg s5">S5</div>
+    <div class="tbar-seg s6">S6</div>
+  </div>
+  <div style="display:flex; gap:3px; margin-bottom:10px;">
+    <div style="flex:3; font-size:9px; color:#8A8D8B; padding-top:3px;">Sem 1</div>
+    <div style="flex:4; font-size:9px; color:#8A8D8B; padding-top:3px;">Sem 2</div>
+    <div style="flex:3; font-size:9px; color:#8A8D8B; padding-top:3px;">Sem 3</div>
+    <div style="flex:3; font-size:9px; color:#8A8D8B; padding-top:3px;">Sem 4</div>
+    <div style="flex:3; font-size:9px; color:#8A8D8B; padding-top:3px;">Sem 5</div>
+    <div style="flex:4; font-size:9px; color:#8A8D8B; padding-top:3px;">Sem 6–7</div>
+  </div>
+  <div class="timeline-pilot">
+    <strong>Piloto 8 semanas →</strong> 10–15 aliados reales · North Star: 50% de pedidos por portal · arranca inmediatamente después del go-live
+  </div>
+</div>
+
+<div class="section-title">Dependencias del cliente (D'MARIO debe entregar)</div>
+<div class="warnings">
+  <div class="warn-item">
+    <div class="warn-icon">⚠️</div>
+    <div><strong>Sprint 6:</strong> 470 clientes en formato limpio (Excel/CSV) con NIT, cupo asignado, KAM asignado y ciudad. Sin esto el sprint 6 se bloquea.</div>
+  </div>
+  <div class="warn-item">
+    <div class="warn-icon">⚠️</div>
+    <div><strong>Sprint 6:</strong> Fotos reales del catálogo (fondos neutros, consistentes). Sin fotos el catálogo sale con placeholders.</div>
+  </div>
+  <div class="warn-item">
+    <div class="warn-icon">⚠️</div>
+    <div><strong>Sprint 4:</strong> Cuenta Wompi/PayU activa. El proceso de afiliación PSE tarda 2–4 semanas — deben iniciarlo ya.</div>
+  </div>
+  <div class="warn-item info">
+    <div class="warn-icon">✓</div>
+    <div><strong>Wompi no tiene costo fijo</strong> — cobra ~2.9% por transacción. Ese costo lo asume D'MARIO, no entra en la cotización.</div>
+  </div>
+</div>
+
+<div class="total-footer">
+  <div class="tf-left">
+    <div class="tf-label">Proyecto</div>
+    <div class="tf-name">B2B D'MARIO · Backend MVP Fase 1</div>
+  </div>
+  <div class="tf-right">
+    <div class="tf-label">Total infraestructura + herramientas</div>
+    <div class="tf-total">$3,192,000</div>
+    <div class="tf-sub">+ honorarios negociados aparte · pagos en 5 hitos · SMC Soluciones · Junio 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
