@@ -6,10 +6,32 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ## [Unreleased]
 
-### Sprint 3 — Cuenta y cartera (próximo)
-- GET /orders — historial de pedidos del aliado
-- POST /orders/:id/repeat — recompra en 1 clic
-- GET /invoices/me — facturas pendientes y vencidas
+### Sprint 4 — Pagos PSE (próximo)
+- POST /invoices/:id/pay — iniciar pago Wompi
+- POST /webhooks/wompi — confirmar pago y calcular comisión KAM
+- GET /invoices/:id — estado de factura individual
+
+---
+
+## [0.3.1] — 2026-06-20 · Sprint 3 QA
+
+### Fixed
+- `OrdersController`: `GET /orders?status=invalido` devolvía 500; ahora retorna 400 con enum values válidos
+- `InvoicesController`: `GET /invoices/me?status=xxx` devolvía 500; misma corrección con `@BadRequestException`
+- `InvoicesService`: columna `due_date` corregida a `"dueDate"` en query builder (TypeORM mapeo camelCase)
+
+### Added
+- `test-report-sprint3.docx`: informe de pruebas Sprint 3 (13/13 PASS) con evidencias, 2 bugs encontrados y corregidos
+
+---
+
+## [0.3.0] — 2026-06-20 · Sprint 3: Cuenta y cartera
+
+### Added
+- `GET /api/orders` — historial de pedidos paginado del aliado con filtro opcional por status (`alistamiento`, `despacho`, `entregado`)
+- `POST /api/orders/:id/repeat` — recompra en 1 clic: copia ítems y forma de pago del pedido original, verifica stock y cupo actuales, genera nuevo pedido en transacción atómica
+- `GET /api/invoices/me` — facturas del aliado con filtro por status y cálculo automático de `daysOverdue`; auto-marca como `vencida` las facturas pendientes con `dueDate < hoy`
+- `InvoicesModule` / `InvoicesService` / `InvoicesController` — módulo independiente
 
 ---
 

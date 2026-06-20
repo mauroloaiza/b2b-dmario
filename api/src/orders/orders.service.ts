@@ -12,6 +12,12 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { InvoiceStatus, OrderStatus, PaymentTerm } from '../common/enums';
 import { ClientsService } from '../clients/clients.service';
 
+export interface OrdersFilter {
+  page: number;
+  limit: number;
+  status?: OrderStatus;
+}
+
 // Descuentos por forma de pago (sobre subtotal)
 const DISCOUNT_RATE: Record<PaymentTerm, number> = {
   [PaymentTerm.CONTADO]:     0.08,
@@ -151,6 +157,45 @@ export class OrdersService {
     });
   }
 
+  // ── HISTORY ──────────────────────────────────────────────────────────────
+  async findByClient(clientId: string, filter: OrdersFilter) {
+    const { page, limit, status } = filter;
+    const take = Math.min(limit, 50);
+    const skip = (page - 1) * take;
+
+    const where: Record<string, unknown> = { client: { id: clientId } };
+    if (status) where['status'] = status;
+
+    const [data, total] = await this.orderRepo.findAndCount({
+      where,
+      relations: { items: true },
+      order: { createdAt: 'DESC' },
+      take,
+      skip,
+    });
+
+    return {
+      meta: { total, page, pages: Math.ceil(total / take), limit: take },
+      data: data.map((o) => this.toOrderDto(o)),
+    };
+  }
+
+  // ── REPEAT ────────────────────────────────────────────────────────────────
+  async repeat(orderId: string, clientId: string) {
+    const original = await this.orderRepo.findOne({
+      where: { id: orderId, client: { id: clientId } },
+      relations: { items: { product: true } },
+    });
+    if (!original) throw new NotFoundException(`Pedido ${orderId} no encontrado`);
+
+    const dto: CreateOrderDto = {
+      paymentTerm: original.paymentTerm,
+      items: original.items.map((i) => ({ productId: i.product.id, qty: i.qty })),
+    };
+
+    return this.create(dto, clientId);
+  }
+
   // ── HELPERS ───────────────────────────────────────────────────────────────
   private async calcTotals(dto: CreateOrderDto) {
     const lines: {
@@ -177,5 +222,19 @@ export class OrdersService {
     const total    = subtotal - discount;
 
     return { lines, subtotal, discount, total };
+  }
+
+  private toOrderDto(o: Order) {
+    return {
+      orderId:     o.id,
+      code:        o.code,
+      paymentTerm: o.paymentTerm,
+      subtotal:    Number(o.subtotal),
+      discount:    Number(o.discount),
+      total:       Number(o.total),
+      status:      o.status,
+      itemCount:   o.items?.length ?? 0,
+      createdAt:   o.createdAt,
+    };
   }
 }

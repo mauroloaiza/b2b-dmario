@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ClientsModule } from './clients/clients.module';
+import { InvoicesModule } from './invoices/invoices.module';
 import { OrdersModule } from './orders/orders.module';
 import { VendorsModule } from './vendors/vendors.module';
 
@@ -30,6 +31,7 @@ import { VendorsModule } from './vendors/vendors.module';
     AuthModule,
     CatalogModule,
     ClientsModule,
+    InvoicesModule,
     OrdersModule,
     VendorsModule,
   ],
