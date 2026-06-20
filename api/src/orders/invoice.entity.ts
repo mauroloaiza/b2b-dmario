@@ -39,6 +39,12 @@ export class Invoice {
   @Column({ type: 'bigint', nullable: true })
   commission: number; // 3% al recaudo, calculado al pagar
 
+  @Column({ nullable: true, unique: true })
+  wompiRef: string; // referencia única enviada a Wompi
+
+  @Column({ nullable: true })
+  wompiTxId: string; // id de transacción Wompi (llega en webhook)
+
   @CreateDateColumn()
   createdAt: Date;
 }

@@ -6,10 +6,30 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ## [Unreleased]
 
-### Sprint 4 — Pagos PSE (próximo)
-- POST /invoices/:id/pay — iniciar pago Wompi
-- POST /webhooks/wompi — confirmar pago y calcular comisión KAM
-- GET /invoices/:id — estado de factura individual
+### Sprint 5 — Panel KAM (próximo)
+- GET /kam/dashboard — meta vs real, alertas de cupo, segmentación 80/20
+- GET /kam/clients — listado de aliados con cupo y riesgo
+- GET /kam/commissions — comisiones acumuladas por periodo
+
+---
+
+## [0.4.1] — 2026-06-20 · Sprint 4 QA
+
+### Added
+- `test-report-sprint4.docx`: informe de pruebas Sprint 4 (14/14 PASS)
+
+---
+
+## [0.4.0] — 2026-06-20 · Sprint 4: Pagos PSE Wompi
+
+### Added
+- `POST /api/invoices/:id/pay` — genera URL de checkout Wompi firmada con `signature:integrity`; idempotente (reutiliza `wompiRef` si ya existe)
+- `POST /api/webhooks/wompi` — recibe eventos Wompi, verifica firma `x-event-checksum` (cuando `WOMPI_EVENTS_SECRET` está configurado), marca factura como `pagada`, calcula comisión KAM 3% si el pago es a tiempo (`paidAt ≤ dueDate`), decrementa `creditUsed` en crédito 90
+- `GET /api/invoices/:id` — detalle completo de una factura: `status`, `paidAt`, `commission`, `wompiRef`, `wompiTxId`
+- `GET /api/payments/result` — landing de retorno tras pago en portal Wompi
+- `Invoice.wompiRef` y `Invoice.wompiTxId` — nuevas columnas para rastrear transacciones Wompi
+- Variables de entorno documentadas en `.env.example`: `WOMPI_PUB_KEY`, `WOMPI_PRIV_KEY`, `WOMPI_INTEGRITY_SECRET`, `WOMPI_EVENTS_SECRET`, `APP_URL`
+- Webhook idempotente: `already_paid`, `ref_not_found`, `not_approved`, `ignored` como respuestas sin efecto secundario
 
 ---
 

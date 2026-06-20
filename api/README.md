@@ -147,7 +147,7 @@ src/
 | 1 — Cimientos | ✅ | Docker, DB, entidades, Better Auth, seed |
 | 2 — Comprar | ✅ | Catálogo, `/me`, `/orders/preview`, `/orders` con reglas de negocio |
 | 3 — Cuenta y cartera | ✅ | Historial, recompra en 1 clic, facturas con días de mora |
-| 4 — Pagos PSE | ⏳ | Wompi, webhooks, comisión al recaudo |
+| 4 — Pagos PSE | ✅ | Wompi checkout, webhooks, comisión KAM al recaudo |
 | 5 — Panel KAM | ⏳ | Alertas, segmentación 80/20, metas |
 | 6 — Datos reales + QA | ⏳ | 470 clientes, catálogo real, producción |
 
