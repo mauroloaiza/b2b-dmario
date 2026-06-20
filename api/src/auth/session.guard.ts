@@ -1,5 +1,5 @@
 import {
-  CanActivate, ExecutionContext, Injectable, UnauthorizedException,
+  CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { auth } from './auth.instance';
@@ -39,7 +39,7 @@ export class SessionGuard implements CanActivate {
 
     const userRole = (session.user as any).role as UserRole;
     if (!requiredRoles.includes(userRole)) {
-      throw new UnauthorizedException(`Se requiere rol: ${requiredRoles.join(' o ')}`);
+      throw new ForbiddenException(`Se requiere rol: ${requiredRoles.join(' o ')}`);
     }
 
     return true;

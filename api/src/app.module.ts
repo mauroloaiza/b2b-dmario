@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ClientsModule } from './clients/clients.module';
 import { InvoicesModule } from './invoices/invoices.module';
+import { KamModule } from './kam/kam.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { VendorsModule } from './vendors/vendors.module';
@@ -33,6 +34,7 @@ import { VendorsModule } from './vendors/vendors.module';
     CatalogModule,
     ClientsModule,
     InvoicesModule,
+    KamModule,
     OrdersModule,
     PaymentsModule,
     VendorsModule,

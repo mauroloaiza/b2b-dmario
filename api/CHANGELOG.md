@@ -6,10 +6,28 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ## [Unreleased]
 
-### Sprint 5 — Panel KAM (próximo)
-- GET /kam/dashboard — meta vs real, alertas de cupo, segmentación 80/20
-- GET /kam/clients — listado de aliados con cupo y riesgo
-- GET /kam/commissions — comisiones acumuladas por periodo
+---
+
+## [0.5.1] — 2026-06-20 · Sprint 5 QA
+
+### Added
+- `test-report-sprint5.docx`: informe de pruebas Sprint 5 (11/11 PASS)
+
+### Fixed
+- `SessionGuard`: roles incorrectos ahora devuelven HTTP 403 (ForbiddenException) en lugar de 401 (F-F cerrado)
+
+---
+
+## [0.5.0] — 2026-06-20 · Sprint 5: Panel KAM
+
+### Added
+- `GET /api/kam/dashboard` — resumen ejecutivo del KAM: meta, YTD real, cumplimiento %, regla 80/20, alertas de cupo (>80% usado), facturas vencidas del portafolio
+- `GET /api/kam/clients` — listado paginado de aliados con filtros `?status` y `?segment`, ordenado por YTD descendente; incluye `creditUsedPct`
+- `GET /api/kam/commissions` — comisiones por año (`?year`) y mes (`?month`) con volumen total y desglose por factura; campo `onTime` para comisiones a tiempo
+- Aislamiento por `vendorId`: cada KAM solo accede a sus propios aliados y comisiones
+
+### Security
+- Todas las rutas `/api/kam/*` requieren rol `KAM`; aliados y usuarios sin sesión reciben 403/401 respectivamente
 
 ---
 
