@@ -39,6 +39,9 @@ async function seed() {
   await ds.initialize();
   console.log("🌱 Iniciando seed D'MARIO B2B...");
 
+  // Secuencia para códigos P-XXXX (idempotente)
+  await ds.query(`CREATE SEQUENCE IF NOT EXISTS order_code_seq START 1`);
+
   // Better Auth auto-migra sus tablas (user, session, account, verification)
   // Las entidades de negocio las gestiona TypeORM con synchronize:true
 

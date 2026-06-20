@@ -87,9 +87,9 @@ export class OrdersService {
         await em.decrement(Product, { id: line.productId }, 'stock', line.qty);
       }
 
-      // 2. Generar código P-XXXX
-      const count = await em.count(Order);
-      const code  = `P-${String(count + 1).padStart(4, '0')}`;
+      // 2. Generar código P-XXXX con nextval atómico (evita duplicados bajo carga)
+      const seq = await em.query(`SELECT nextval('order_code_seq') AS n`);
+      const code = `P-${String(seq[0].n).padStart(4, '0')}`;
 
       // 3. Crear pedido
       const order = em.create(Order, {

@@ -1,5 +1,6 @@
 import {
-  BadRequestException, Injectable, NotFoundException, UnauthorizedException,
+  BadRequestException, Injectable, NotFoundException,
+  ServiceUnavailableException, UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,21 +9,19 @@ import * as crypto from 'crypto';
 import { Invoice } from '../orders/invoice.entity';
 import { Client } from '../clients/client.entity';
 import { Vendor } from '../vendors/vendor.entity';
-import { InvoiceStatus } from '../common/enums';
+import { InvoiceStatus, PaymentTerm } from '../common/enums';
 
 const COMMISSION_RATE = 0.03;
-// Comisión solo si paga antes o en fecha de vencimiento
 const onTime = (paidAt: Date, dueDate: string) =>
   paidAt <= new Date(dueDate + 'T23:59:59Z');
 
 @Injectable()
 export class PaymentsService {
   private readonly pubKey: string;
-  private readonly privKey: string;
   private readonly integritySecret: string;
   private readonly eventsSecret: string;
   private readonly baseUrl: string;
-  private readonly wompiBase: string;
+  private readonly wompiBase = 'https://checkout.wompi.co/p';
 
   constructor(
     @InjectRepository(Invoice) private readonly invoiceRepo: Repository<Invoice>,
@@ -31,19 +30,21 @@ export class PaymentsService {
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
   ) {
-    const env = this.config.get('NODE_ENV');
-    this.pubKey         = this.config.get('WOMPI_PUB_KEY', '');
-    this.privKey        = this.config.get('WOMPI_PRIV_KEY', '');
+    this.pubKey          = this.config.get('WOMPI_PUB_KEY', '');
     this.integritySecret = this.config.get('WOMPI_INTEGRITY_SECRET', '');
-    this.eventsSecret   = this.config.get('WOMPI_EVENTS_SECRET', '');
-    this.baseUrl        = this.config.get('APP_URL', 'http://localhost:3000');
-    this.wompiBase      = env === 'production'
-      ? 'https://checkout.wompi.co/p'
-      : 'https://checkout.wompi.co/p'; // sandbox usa mismo dominio con pub_key de sandbox
+    this.eventsSecret    = this.config.get('WOMPI_EVENTS_SECRET', '');
+    this.baseUrl         = this.config.get('APP_URL', 'http://localhost:3000');
   }
 
   // ── INICIAR PAGO ──────────────────────────────────────────────────────────
   async initPay(invoiceId: string, clientId: string) {
+    // F-A: fallar antes de generar URL inútil si Wompi no está configurado
+    if (!this.pubKey || !this.integritySecret) {
+      throw new ServiceUnavailableException(
+        'Pasarela de pagos no configurada. Contacta a soporte.',
+      );
+    }
+
     const invoice = await this.invoiceRepo.findOne({
       where: { id: invoiceId, client: { id: clientId } },
       relations: { order: true, client: true, vendor: true },
@@ -53,46 +54,40 @@ export class PaymentsService {
       throw new BadRequestException('La factura ya está pagada');
     }
 
-    // Reutilizar ref si ya existe (idempotente), sino generar nueva
-    const ref = invoice.wompiRef ?? `DMB2B-${invoice.order?.code ?? invoiceId.slice(0, 8)}-${Date.now()}`;
+    // F-B: UUID corto en lugar de timestamp para evitar colisiones en concurrencia
+    const ref = invoice.wompiRef
+      ?? `DMB2B-${invoice.order?.code ?? invoiceId.slice(0, 8)}-${crypto.randomUUID().slice(0, 8)}`;
 
-    // Persistir ref si es nueva
     if (!invoice.wompiRef) {
       await this.invoiceRepo.update(invoiceId, { wompiRef: ref });
     }
 
-    const amountCents = Number(invoice.amount) * 100; // Wompi trabaja en centavos
-
-    // Firma de integridad: SHA256(ref + amountCents + currency + integritySecret)
+    const amountCents = Number(invoice.amount) * 100;
     const signatureStr = `${ref}${amountCents}COP${this.integritySecret}`;
     const signature = crypto.createHash('sha256').update(signatureStr).digest('hex');
 
-    const redirectUrl = `${this.baseUrl}/api/payments/result`;
-
     const params = new URLSearchParams({
-      'public-key':           this.pubKey || 'pub_test_CONFIGURE_WOMPI_PUB_KEY',
-      'currency':             'COP',
-      'amount-in-cents':      String(amountCents),
-      'reference':            ref,
-      'redirect-url':         redirectUrl,
-      'signature:integrity':  signature,
+      'public-key':          this.pubKey,
+      'currency':            'COP',
+      'amount-in-cents':     String(amountCents),
+      'reference':           ref,
+      'redirect-url':        `${this.baseUrl}/api/payments/result`,
+      'signature:integrity': signature,
     });
 
     return {
       invoiceId,
-      orderCode:     invoice.order?.code ?? null,
-      amount:        Number(invoice.amount),
+      orderCode:   invoice.order?.code ?? null,
+      amount:      Number(invoice.amount),
       amountCents,
-      dueDate:       invoice.dueDate,
-      wompiRef:      ref,
-      checkoutUrl:   `${this.wompiBase}/?${params.toString()}`,
-      configured:    !!this.pubKey,
+      dueDate:     invoice.dueDate,
+      wompiRef:    ref,
+      checkoutUrl: `${this.wompiBase}/?${params.toString()}`,
     };
   }
 
   // ── WEBHOOK WOMPI ─────────────────────────────────────────────────────────
   async handleWebhook(payload: Record<string, any>, signatureHeader: string) {
-    // Verificar firma del webhook: SHA256(timestamp + properties + eventsSecret)
     if (this.eventsSecret) {
       const { timestamp, checksum } = this.parseWompiSignature(signatureHeader);
       const toSign = `${timestamp}${JSON.stringify(payload)}${this.eventsSecret}`;
@@ -111,41 +106,59 @@ export class PaymentsService {
     const ref: string = tx.reference;
     const txId: string = tx.id;
 
-    const invoice = await this.invoiceRepo.findOne({
+    // F-C: gate atómico — UPDATE … WHERE status = pendiente/vencida devuelve affected=0 si ya pagada
+    const paidAt = new Date();
+    const gate = await this.invoiceRepo
+      .createQueryBuilder()
+      .update(Invoice)
+      .set({ wompiTxId: txId })
+      .where('wompiRef = :ref', { ref })
+      .andWhere('status IN (:...payable)', {
+        payable: [InvoiceStatus.PENDIENTE, InvoiceStatus.VENCIDA],
+      })
+      .returning('id, amount, "dueDate", client_id, order_id')
+      .execute();
+
+    if (gate.affected === 0) {
+      // ref no existe O ya estaba pagada — ambos son idempotentes
+      const exists = await this.invoiceRepo.existsBy({ wompiRef: ref });
+      return { received: true, action: exists ? 'already_paid' : 'ref_not_found', ref };
+    }
+
+    // Cargar la factura completa para calcular comisión y actualizar cliente
+    const invoice = await this.invoiceRepo.findOneOrFail({
       where: { wompiRef: ref },
-      relations: { client: true, vendor: true, order: true },
+      relations: { client: true, order: true },
     });
-    if (!invoice) return { received: true, action: 'ref_not_found', ref };
-    if (invoice.status === InvoiceStatus.PAGADA) return { received: true, action: 'already_paid' };
 
     return this.dataSource.transaction(async (em) => {
-      const paidAt = new Date();
       const commission = onTime(paidAt, invoice.dueDate)
         ? Math.round(Number(invoice.amount) * COMMISSION_RATE)
         : 0;
 
-      // Actualizar factura
       await em.update(Invoice, { id: invoice.id }, {
-        status:   InvoiceStatus.PAGADA,
+        status: InvoiceStatus.PAGADA,
         paidAt,
         commission,
-        wompiTxId: txId,
       });
 
-      // Decrementar creditUsed del cliente si era crédito 90
-      if (invoice.order?.paymentTerm === 'credito90') {
-        await em.decrement(Client, { id: invoice.client.id }, 'creditUsed', Number(invoice.amount));
+      // Liberar cupo solo en crédito 90 (con floor en 0 para evitar negativos)
+      if (invoice.order?.paymentTerm === PaymentTerm.CREDITO_90) {
+        await em.query(
+          `UPDATE clients SET "creditUsed" = GREATEST(0, "creditUsed" - $1) WHERE id = $2`,
+          [Number(invoice.amount), invoice.client.id],
+        );
       }
 
       return {
-        received:   true,
-        action:     'paid',
-        invoiceId:  invoice.id,
-        orderCode:  invoice.order?.code,
-        amount:     Number(invoice.amount),
+        received:  true,
+        action:    'paid',
+        invoiceId: invoice.id,
+        orderCode: invoice.order?.code,
+        amount:    Number(invoice.amount),
         paidAt,
         commission,
-        onTime:     commission > 0,
+        onTime:    commission > 0,
       };
     });
   }
@@ -183,7 +196,6 @@ export class PaymentsService {
 
   // ── HELPERS ───────────────────────────────────────────────────────────────
   private parseWompiSignature(header: string): { timestamp: string; checksum: string } {
-    // Header format: "t=1234567890,v1=abc123..."
     const parts = Object.fromEntries(header.split(',').map((p) => p.split('=')));
     return { timestamp: parts['t'] ?? '', checksum: parts['v1'] ?? '' };
   }
