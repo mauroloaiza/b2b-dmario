@@ -145,7 +145,7 @@ src/
 | Sprint | Estado | Descripción |
 |---|---|---|
 | 1 — Cimientos | ✅ | Docker, DB, entidades, Better Auth, seed |
-| 2 — Comprar | ⏳ | Catálogo, carrito, `/orders/preview`, validación cupo |
+| 2 — Comprar | ✅ | Catálogo, `/me`, `/orders/preview`, `/orders` con reglas de negocio |
 | 3 — Cuenta y cartera | ⏳ | Historial, recompra en 1 clic, facturas |
 | 4 — Pagos PSE | ⏳ | Wompi, webhooks, comisión al recaudo |
 | 5 — Panel KAM | ⏳ | Alertas, segmentación 80/20, metas |

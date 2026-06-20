@@ -6,11 +6,25 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ## [Unreleased]
 
-### Sprint 2 — Comprar (próximo)
-- GET /catalog — catálogo con filtros por línea y búsqueda
-- GET /me — datos del aliado: cupo, vendedor, condiciones
-- POST /orders/preview — recalcular totales y validar cupo en vivo
-- POST /orders — confirmar pedido: descontar stock, sumar cupo, generar factura
+### Sprint 3 — Cuenta y cartera (próximo)
+- GET /orders — historial de pedidos del aliado
+- POST /orders/:id/repeat — recompra en 1 clic
+- GET /invoices/me — facturas pendientes y vencidas
+
+---
+
+## [0.2.0] — 2026-06-20 · Sprint 2: Comprar
+
+### Added
+- `GET /api/catalog` — catálogo con filtros por línea, búsqueda libre, badge y paginación; incluye `pvpSugerido = round(priceMayo × 1.35 / 100) × 100`
+- `GET /api/catalog/:id` — detalle de un producto
+- `GET /api/me` — datos del aliado autenticado: cupo disponible, segmento, KAM asignado (solo rol `aliado`)
+- `POST /api/orders/preview` — previsualización de pedido con descuentos y validación de cupo sin persistir
+- `POST /api/orders` — confirmación de pedido en transacción atómica: valida stock, aplica descuentos, genera código `P-XXXX`, actualiza `creditUsed` y `ytd`, crea `Invoice` con vencimiento según forma de pago
+- `CatalogService`, `ClientsService`, `OrdersService` — lógica de negocio separada de controladores
+- DTO `CreateOrderDto` con `class-validator` (enum `PaymentTerm` + array de ítems)
+- Reglas de negocio implementadas: contado −8% / pronto pago −5% / crédito 90 sin dcto + validación cupo
+- Control de acceso: `/me` y `/orders/*` exigen rol `aliado`; `/catalog` cualquier sesión válida
 
 ---
 
