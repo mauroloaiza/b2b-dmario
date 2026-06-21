@@ -7,11 +7,13 @@ import { Product } from '../catalog/product.entity';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { ClientsModule } from '../clients/clients.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, Invoice, Product]),
     ClientsModule,
+    NotificationsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

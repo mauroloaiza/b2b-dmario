@@ -6,6 +6,7 @@ import { Client } from '../clients/client.entity';
 import { Order } from '../orders/order.entity';
 import { Vendor } from '../vendors/vendor.entity';
 import { ClientSegment, ClientStatus, OrderStatus, ProductBadge } from '../common/enums';
+import { NotificationsService } from '../notifications/notifications.service';
 
 @Injectable()
 export class AdminService {
@@ -14,6 +15,7 @@ export class AdminService {
     @InjectRepository(Client)  private clients:  Repository<Client>,
     @InjectRepository(Order)   private orders:   Repository<Order>,
     @InjectRepository(Vendor)  private vendors:  Repository<Vendor>,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ── Dashboard stats ────────────────────────────────────────────────────────
@@ -124,10 +126,22 @@ export class AdminService {
   }
 
   async updateOrderStatus(id: string, status: OrderStatus) {
-    const o = await this.orders.findOneBy({ id });
+    const o = await this.orders.findOne({ where: { id }, relations: { client: true } });
     if (!o) throw new NotFoundException('Pedido no encontrado');
     o.status = status;
-    return this.orders.save(o);
+    const saved = await this.orders.save(o);
+
+    if (o.client?.email) {
+      this.notifications.sendStatusUpdate({
+        to:         o.client.email,
+        clientName: o.client.name,
+        code:       o.code,
+        status,
+        total:      Number(o.total),
+      }).catch(() => {/* fire-and-forget */});
+    }
+
+    return saved;
   }
 
   // ── Vendors ────────────────────────────────────────────────────────────────

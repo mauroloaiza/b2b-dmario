@@ -11,6 +11,7 @@ import { Client } from '../clients/client.entity';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { InvoiceStatus, OrderStatus, PaymentTerm } from '../common/enums';
 import { ClientsService } from '../clients/clients.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 export interface OrdersFilter {
   page: number;
@@ -41,6 +42,7 @@ export class OrdersService {
     @InjectRepository(Product) private readonly productRepo: Repository<Product>,
     private readonly clientsService: ClientsService,
     private readonly dataSource: DataSource,
+    private readonly notifications: NotificationsService,
   ) {}
 
   // ── PREVIEW ──────────────────────────────────────────────────────────────
@@ -141,7 +143,7 @@ export class OrdersService {
       });
       await em.save(Invoice, invoice);
 
-      return {
+      const result = {
         orderId:     order.id,
         code:        order.code,
         paymentTerm: order.paymentTerm,
@@ -154,6 +156,22 @@ export class OrdersService {
         items:       lines,
         createdAt:   order.createdAt,
       };
+
+      if (client.email) {
+        this.notifications.sendOrderConfirmed({
+          to:          client.email,
+          clientName:  client.name,
+          code:        order.code,
+          paymentTerm: order.paymentTerm,
+          items:       lines,
+          subtotal,
+          discount,
+          total,
+          dueDate:     invoice.dueDate,
+        }).catch(() => {/* fire-and-forget */});
+      }
+
+      return result;
     });
   }
 

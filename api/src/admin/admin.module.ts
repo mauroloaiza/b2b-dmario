@@ -6,9 +6,13 @@ import { Order }   from '../orders/order.entity';
 import { Vendor }  from '../vendors/vendor.entity';
 import { AdminService }    from './admin.service';
 import { AdminController } from './admin.controller';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, Client, Order, Vendor])],
+  imports: [
+    TypeOrmModule.forFeature([Product, Client, Order, Vendor]),
+    NotificationsModule,
+  ],
   providers: [AdminService],
   controllers: [AdminController],
 })
