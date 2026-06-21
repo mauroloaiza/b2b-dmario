@@ -28,9 +28,9 @@ export default function AdminDashboard() {
   const activeClients  = data.clientsByStatus['activo']   ?? 0;
   const riskClients    = data.clientsByStatus['riesgo']   ?? 0;
   const inactiveClients = data.clientsByStatus['inactivo'] ?? 0;
-  const pendingOrders  = data.ordersByStatus['alistamiento'] ?? 0;
-  const shippedOrders  = data.ordersByStatus['despacho']     ?? 0;
-  const deliveredOrders = data.ordersByStatus['entregado']   ?? 0;
+  const pendingOrders   = (data.ordersByStatus['alistando']  ?? 0) + (data.ordersByStatus['confirmado'] ?? 0) + (data.ordersByStatus['pendiente'] ?? 0);
+  const shippedOrders   = data.ordersByStatus['en_ruta']    ?? 0;
+  const deliveredOrders = data.ordersByStatus['entregado']  ?? 0;
 
   return (
     <div>
@@ -71,8 +71,8 @@ export default function AdminDashboard() {
       <h3 className="h3 mb-3">Estado de pedidos</h3>
       <div className="card p-0 overflow-hidden">
         {[
-          { label: 'En alistamiento', value: pendingOrders,  color: 'bg-accent-soft text-accent' },
-          { label: 'En despacho',     value: shippedOrders,  color: 'bg-ok-soft text-ok' },
+          { label: 'Pendiente / Confirmado / Alistando', value: pendingOrders,  color: 'bg-accent-soft text-accent' },
+          { label: 'En ruta',                           value: shippedOrders,  color: 'bg-ok-soft text-ok' },
           { label: 'Entregados',      value: deliveredOrders, color: 'bg-ivory text-ink-mute' },
         ].map((row, i, arr) => (
           <div key={row.label} className={`flex items-center justify-between px-5 py-4 ${i < arr.length - 1 ? 'border-b border-rule' : ''}`}>

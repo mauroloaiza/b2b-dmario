@@ -8,6 +8,23 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ---
 
+## [0.10.0] — 2026-06-21 · Sprint 10: Correcciones y cliente detalle
+
+### Fixed
+- `Dashboard.tsx`: claves viejas `alistamiento`/`despacho` → agrupación correcta con los 6 valores nuevos del enum (`pendiente + confirmado + alistando`, `en_ruta`, `entregado`)
+- `Orders.tsx` (admin): `STATUS_OPTS`, `STATUS_LABEL`, `STATUS_COLOR` actualizados a los 6 valores del enum; filtro de estado corregido
+
+### Frontend
+- `Clients.tsx` (admin): reemplaza el modal de edición directo con un **drawer de detalle lateral** que abre al hacer clic en cualquier fila:
+  - KPI mini-grid: YTD, Cupo total, Disponible con color semáforo
+  - Barra de uso de cupo con colores verde/amber/rojo
+  - Sección KAM asignado con avatar
+  - Fecha del último pedido
+  - Últimos 8 pedidos del cliente cargados on-demand via `GET /admin/orders?clientId=`
+  - Botón "Editar" dentro del drawer abre el `ClientModal` en z-index superior
+
+---
+
 ## [0.9.0] — 2026-06-20 · Sprint 9: OrderStatus, Topbar, Catálogo sidebar, CI
 
 ### Backend

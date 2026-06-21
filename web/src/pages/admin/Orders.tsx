@@ -4,12 +4,22 @@ import { Spinner, PageError } from '../../components/Spinner';
 
 const cop = (n: number) => '$' + Math.round(n).toLocaleString('es-CO');
 
-const STATUS_OPTS = ['', 'alistamiento', 'despacho', 'entregado'];
+const STATUS_OPTS = ['', 'pendiente', 'confirmado', 'alistando', 'en_ruta', 'entregado', 'cancelado'];
 const STATUS_LABEL: Record<string, string> = {
-  alistamiento: 'Alistamiento', despacho: 'En despacho', entregado: 'Entregado',
+  pendiente:  'Pendiente',
+  confirmado: 'Confirmado',
+  alistando:  'Alistando',
+  en_ruta:    'En ruta',
+  entregado:  'Entregado',
+  cancelado:  'Cancelado',
 };
 const STATUS_COLOR: Record<string, string> = {
-  alistamiento: 'pill-proc', despacho: 'pill-ok', entregado: 'bg-ivory text-ink-mute border border-rule',
+  pendiente:  'bg-line text-ink-mute',
+  confirmado: 'bg-ok/10 text-ok',
+  alistando:  'pill-proc',
+  en_ruta:    'pill-ok',
+  entregado:  'bg-ivory text-ink-mute border border-rule',
+  cancelado:  'bg-error/20 text-error',
 };
 const TERM_LABEL: Record<string, string> = {
   contado: 'Contado', pronto_pago: 'Pronto 30d', credito90: '90 días',
