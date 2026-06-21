@@ -8,6 +8,74 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ---
 
+## [0.8.0] — 2026-06-20 · Sprint 8: Mi cuenta
+
+### Added
+- `GET /orders/recompra` — sugiere top 8 productos frecuentes del aliado; calcula ciclo promedio
+  de recompra (días entre pedidos consecutivos por producto), días desde el último pedido y flag
+  `tocaPedir` cuando ≥85% del ciclo ha transcurrido; resultado ordenado por urgencia descendente
+
+### Frontend
+- `Account.tsx` rediseño completo alineado al handoff de diseño:
+  - KPI cards: Compras YTD (sparkline decorativo), Cupo disponible con barra de uso,
+    Saldo en cartera con contador de facturas, Puntos lealtad derivados del YTD
+  - Sección "Recompra inteligente": cards con imagen/ref, ciclo promedio, días transcurridos,
+    alerta naranja "toca pedir", botón "+ Agregar" con feedback visual ✓
+  - Historial de pedidos: últimos 5 con estado en pill de color, acciones Repetir y Factura
+  - Facturas pendientes inline con total acumulado y enlace Pagar PSE
+  - Tarjeta del vendedor asignado con botón directo a WhatsApp
+  - Botones "Descargar estado" y "WhatsApp con {vendedor}" en el header del cliente
+
+---
+
+## [0.7.0] — 2026-06-20 · Sprint 7: Notificaciones + Pantallas
+
+### Added
+
+**Notificaciones (Nodemailer):**
+- `NotificationsModule` / `NotificationsService` — Nodemailer con fallback automático a
+  cuenta Ethereal cuando `SMTP_HOST` está vacío (preview URL en consola en dev)
+- `sendOrderConfirmed()` — email HTML al aliado con tabla de ítems, descuento, total
+  y fecha de vencimiento; disparado fire-and-forget tras confirmar pedido
+- `sendStatusUpdate()` — notificación de cambio de estado (alistando/en_ruta/entregado);
+  disparado fire-and-forget al actualizar estado desde admin
+- `Client.email` — columna nullable añadida para routing de notificaciones;
+  5 clientes del seed actualizados con email real de prueba
+- Variables `.env`: `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`
+
+**Backend analytics:**
+- `GET /admin/intelligence` — análisis Pareto 80/20: top 15 clientes por YTD,
+  porcentaje de revenue que concentran, ventas por ciudad (top 8), segmentación A/B/C
+  con conteo y revenue, scoreboard de vendedores con % cumplimiento de meta
+- `GET /admin/treasury` — envejecimiento de CxC en 5 buckets (Corriente / 1-30 / 31-60 /
+  61-90 / +90 días), DSO ponderado por bucket, top 8 deudores, total CxC vs. cartera vencida
+- `Invoice` incorporado a `AdminModule` para extensión futura
+
+**Frontend (6 pantallas nuevas):**
+- `07 Confirmation.tsx` — tracker visual 4 etapas (Confirmado › Alistando › En ruta › Entregado)
+  con líneas de progreso, grilla de datos (código, unidades, total, vencimiento)
+- `05 admin/Intelligence.tsx` — KPIs, barra Pareto animada, top clientes en tabla, barras
+  de ventas por ciudad, segmentación en cards A/B/C, scoreboard de vendedores
+- `08 admin/Coordination.tsx` — cobertura por vendedor, asignación inline con selector,
+  filtros "Sin asignar" y "En riesgo", guardar con PATCH /admin/clients/:id
+- `09 admin/Treasury.tsx` — aging en 5 cards de color, barra corriente/vencida, top
+  deudores en tabla con antigüedad resaltada por semáforo, DSO en KPI
+- `10 admin/Logistics.tsx` — pipeline Kanban con tabs por etapa, cards de pedido con
+  ítems resumidos, botón "→ Avanzar etapa" con actualización en tiempo real
+- `KAM Route.tsx` — lista de cartera con días desde último pedido, alertas "por visitar"
+  (>30d) y "en riesgo", **modo proxy**: toma pedido en nombre del cliente con catálogo
+  rápido y banner naranja de contexto
+- Sidebar admin actualizado: Inteligencia, Coordinación, Cartera, Logística
+- Topbar KAM: enlace "Mi ruta"
+- `adminApi.intelligence()` y `adminApi.treasury()` en `client.ts`
+- Tipos `IntelligenceData` y `TreasuryData` exportados desde `client.ts`
+
+### Security
+- `SMTP_HOST` vacío activa modo Ethereal en lugar de fallar; sin credenciales reales
+  en dev, sin envíos no deseados
+
+---
+
 ## [0.6.0] — 2026-06-20 · Sprint 6: Infraestructura de Producción
 
 ### Added
