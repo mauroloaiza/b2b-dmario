@@ -15,24 +15,29 @@ export class AdminController {
   @Get('stats')
   stats() { return this.svc.stats(); }
 
+  @Get('stats/trend')
+  statsTrend() { return this.svc.statsTrend(); }
+
   // ── Products ───────────────────────────────────────────────────────────────
   @Get('products')
   listProducts(
-    @Query('page')   page   = '1',
-    @Query('limit')  limit  = '30',
-    @Query('line')   line?: string,
-    @Query('active') active?: string,
+    @Query('page')      page      = '1',
+    @Query('limit')     limit     = '30',
+    @Query('line')      line?:    string,
+    @Query('active')    active?:  string,
+    @Query('lowStock')  lowStock?: string,
   ) {
     return this.svc.listProducts(
       +page, +limit, line,
       active == null ? undefined : active === 'true',
+      lowStock === 'true',
     );
   }
 
   @Post('products')
   createProduct(@Body() dto: {
     ref: string; name: string; line: string; priceMayo: number;
-    packSize: number; stock: number; badge?: ProductBadge; active?: boolean;
+    packSize: number; stock: number; badge?: ProductBadge; active?: boolean; imageUrl?: string;
   }) { return this.svc.createProduct(dto); }
 
   @Patch('products/:id')
@@ -40,7 +45,7 @@ export class AdminController {
     @Param('id') id: string,
     @Body() dto: Partial<{
       name: string; line: string; priceMayo: number; packSize: number;
-      stock: number; badge: ProductBadge | null; active: boolean;
+      stock: number; badge: ProductBadge | null; active: boolean; imageUrl: string | null;
     }>,
   ) { return this.svc.updateProduct(id, dto); }
 
@@ -52,6 +57,12 @@ export class AdminController {
     @Query('status')  status?: ClientStatus,
     @Query('segment') segment?: ClientSegment,
   ) { return this.svc.listClients(+page, +limit, status, segment); }
+
+  @Post('clients')
+  createClient(@Body() dto: {
+    code: string; name: string; city: string; email: string;
+    segment?: ClientSegment; creditLimit?: number; vendorId?: string; address?: string;
+  }) { return this.svc.createClient(dto); }
 
   @Patch('clients/:id')
   updateClient(

@@ -76,7 +76,12 @@ function ProductModal({ product, onSave, onClose }: {
             <input className="input w-full" type="number" value={form.stock ?? ''}
               onChange={e => set('stock', +e.target.value)} />
           </div>
-          <div className="flex items-center gap-2 pt-4">
+          <div className="col-span-2">
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">URL de imagen (opcional)</label>
+            <input className="input w-full" placeholder="https://…" value={form.imageUrl ?? ''}
+              onChange={e => set('imageUrl', e.target.value || null)} />
+          </div>
+          <div className="flex items-center gap-2 pt-2">
             <input type="checkbox" id="active" checked={form.active ?? true}
               onChange={e => set('active', e.target.checked)} className="accent-green" />
             <label htmlFor="active" className="text-[13px] text-ink">Activo en catálogo</label>
@@ -100,22 +105,24 @@ export default function AdminProducts() {
   const [page, setPage]         = useState(1);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
-  const [filterLine, setFilterLine]     = useState('');
-  const [filterActive, setFilterActive] = useState<string>('');
+  const [filterLine, setFilterLine]       = useState('');
+  const [filterActive, setFilterActive]   = useState<string>('');
+  const [filterLowStock, setFilterLowStock] = useState(false);
   const [modal, setModal]       = useState<Partial<Product> | null | false>(false);
 
   const load = async () => {
     setLoading(true);
     try {
       const res = await adminApi.listProducts(page, 30, filterLine || undefined,
-        filterActive === '' ? undefined : filterActive === 'true');
+        filterActive === '' ? undefined : filterActive === 'true',
+        filterLowStock || undefined);
       setProducts(res.data);
       setTotal(res.meta.total);
     } catch { setError('Error cargando productos.'); }
     finally { setLoading(false); }
   };
 
-  useEffect(() => { load(); }, [page, filterLine, filterActive]);
+  useEffect(() => { load(); }, [page, filterLine, filterActive, filterLowStock]);
 
   const save = async (dto: Partial<Product>) => {
     if (dto.id) await adminApi.updateProduct(dto.id, dto);
@@ -151,6 +158,12 @@ export default function AdminProducts() {
           <option value="true">Solo activos</option>
           <option value="false">Solo inactivos</option>
         </select>
+        <label className="flex items-center gap-2 cursor-pointer text-[13px] text-ink-soft">
+          <input type="checkbox" checked={filterLowStock}
+            onChange={e => { setFilterLowStock(e.target.checked); setPage(1); }}
+            className="accent-green w-3.5 h-3.5" />
+          Stock bajo (&lt; 10)
+        </label>
       </div>
 
       {loading ? <Spinner /> : (

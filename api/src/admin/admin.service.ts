@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../catalog/product.entity';
 import { Client } from '../clients/client.entity';
 import { Order } from '../orders/order.entity';
 import { Vendor } from '../vendors/vendor.entity';
-import { ClientSegment, ClientStatus, OrderStatus, ProductBadge } from '../common/enums';
+import { ClientSegment, ClientStatus, OrderStatus, ProductBadge, UserRole } from '../common/enums';
 import { NotificationsService } from '../notifications/notifications.service';
+import { auth } from '../auth/auth.instance';
 
 @Injectable()
 export class AdminService {
@@ -57,18 +58,33 @@ export class AdminService {
     };
   }
 
+  // ── Stats trend ────────────────────────────────────────────────────────────
+  async statsTrend() {
+    const rows: { month: string; revenue: string; count: string }[] = await this.orders
+      .createQueryBuilder('o')
+      .select("TO_CHAR(o.created_at, 'YYYY-MM')", 'month')
+      .addSelect('SUM(o.total)', 'revenue')
+      .addSelect('COUNT(*)', 'count')
+      .where("o.created_at >= NOW() - INTERVAL '12 months'")
+      .groupBy("TO_CHAR(o.created_at, 'YYYY-MM')")
+      .orderBy("TO_CHAR(o.created_at, 'YYYY-MM')", 'ASC')
+      .getRawMany();
+    return rows.map(r => ({ month: r.month, revenue: Number(r.revenue), count: Number(r.count) }));
+  }
+
   // ── Products ───────────────────────────────────────────────────────────────
-  async listProducts(page = 1, limit = 30, line?: string, active?: boolean) {
+  async listProducts(page = 1, limit = 30, line?: string, active?: boolean, lowStock?: boolean) {
     const qb = this.products.createQueryBuilder('p').orderBy('p.line').addOrderBy('p.ref');
-    if (line)          qb.andWhere('p.line = :line', { line });
-    if (active != null) qb.andWhere('p.active = :active', { active });
+    if (line)             qb.andWhere('p.line = :line', { line });
+    if (active != null)   qb.andWhere('p.active = :active', { active });
+    if (lowStock)         qb.andWhere('p.stock < :threshold AND p.active = true', { threshold: 10 });
     const [data, total] = await qb.skip((page - 1) * limit).take(limit).getManyAndCount();
     return { meta: { total, page, pages: Math.ceil(total / limit) }, data };
   }
 
   async createProduct(dto: {
     ref: string; name: string; line: string; priceMayo: number;
-    packSize: number; stock: number; badge?: ProductBadge; active?: boolean;
+    packSize: number; stock: number; badge?: ProductBadge; active?: boolean; imageUrl?: string;
   }) {
     const p = this.products.create(dto);
     return this.products.save(p);
@@ -76,7 +92,7 @@ export class AdminService {
 
   async updateProduct(id: string, dto: Partial<{
     name: string; line: string; priceMayo: number; packSize: number;
-    stock: number; badge: ProductBadge | null; active: boolean;
+    stock: number; badge: ProductBadge | null; active: boolean; imageUrl: string | null;
   }>) {
     const p = await this.products.findOneBy({ id });
     if (!p) throw new NotFoundException('Producto no encontrado');
@@ -85,6 +101,39 @@ export class AdminService {
   }
 
   // ── Clients ────────────────────────────────────────────────────────────────
+  async createClient(dto: {
+    code: string; name: string; city: string; email: string;
+    segment?: ClientSegment; creditLimit?: number; vendorId?: string; address?: string;
+  }) {
+    const exists = await this.clients.findOneBy({ code: dto.code });
+    if (exists) throw new ConflictException(`Ya existe un cliente con código ${dto.code}`);
+
+    const client = this.clients.create({
+      code:        dto.code,
+      name:        dto.name,
+      city:        dto.city,
+      email:       dto.email,
+      address:     dto.address,
+      segment:     dto.segment ?? ClientSegment.C,
+      creditLimit: dto.creditLimit ?? 0,
+    });
+    if (dto.vendorId) {
+      client.vendor = (await this.vendors.findOneBy({ id: dto.vendorId })) ?? (null as any);
+    }
+    await this.clients.save(client);
+
+    const tempPassword = `DM@${dto.code.replace(/\W/g, '')}2026`;
+    try {
+      await auth.api.signUpEmail({
+        body: { email: dto.email, password: tempPassword, name: dto.name, role: UserRole.ALIADO, clientId: client.id },
+      });
+    } catch {
+      // User may already exist in auth — continue
+    }
+
+    return { client, tempPassword };
+  }
+
   async listClients(page = 1, limit = 30, status?: ClientStatus, segment?: ClientSegment) {
     const qb = this.clients
       .createQueryBuilder('c')

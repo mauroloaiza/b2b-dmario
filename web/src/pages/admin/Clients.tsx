@@ -2,6 +2,144 @@ import { useEffect, useState } from 'react';
 import { adminApi, type AdminClient, type AdminOrder, type AdminVendor } from '../../api/client';
 import { Spinner, PageError } from '../../components/Spinner';
 
+// ── Create client modal ────────────────────────────────────────────────────────
+function NewClientModal({ vendors, onCreated, onClose }: {
+  vendors: AdminVendor[];
+  onCreated: (result: { client: AdminClient; tempPassword: string }) => void;
+  onClose: () => void;
+}) {
+  const [form, setForm] = useState({
+    code: '', name: '', city: '', email: '',
+    segment: 'C', creditLimit: 0, vendorId: '', address: '',
+  });
+  const [saving, setSaving] = useState(false);
+  const [err, setErr]       = useState('');
+  const set = (k: string, v: any) => setForm(f => ({ ...f, [k]: v }));
+
+  const submit = async () => {
+    if (!form.code || !form.name || !form.city || !form.email) {
+      setErr('Código, nombre, ciudad y correo son obligatorios.'); return;
+    }
+    setSaving(true); setErr('');
+    try {
+      const result = await adminApi.createClient({
+        ...form,
+        creditLimit: form.creditLimit || undefined,
+        vendorId:    form.vendorId    || undefined,
+        address:     form.address     || undefined,
+      });
+      onCreated(result);
+      onClose();
+    } catch (e: any) {
+      setErr(e.body?.message ?? e.message ?? 'Error al crear el cliente.');
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="bg-paper rounded-card shadow-xl w-full max-w-[520px] p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="h3">Nuevo aliado</h3>
+          <button onClick={onClose} className="text-ink-mute hover:text-ink text-[20px]">×</button>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">NIT / Código *</label>
+            <input className="input w-full" placeholder="900123456-1" value={form.code}
+              onChange={e => set('code', e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Ciudad *</label>
+            <input className="input w-full" placeholder="Bogotá" value={form.city}
+              onChange={e => set('city', e.target.value)} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Nombre comercial *</label>
+            <input className="input w-full" placeholder="Joyería ejemplo S.A.S." value={form.name}
+              onChange={e => set('name', e.target.value)} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Correo (login) *</label>
+            <input className="input w-full" type="email" placeholder="contacto@aliado.com" value={form.email}
+              onChange={e => set('email', e.target.value)} />
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Segmento</label>
+            <select className="input w-full" value={form.segment} onChange={e => set('segment', e.target.value)}>
+              <option value="A">A — Premium</option>
+              <option value="B">B — Estándar</option>
+              <option value="C">C — Básico</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Cupo de crédito (COP)</label>
+            <input className="input w-full" type="number" placeholder="0" value={form.creditLimit || ''}
+              onChange={e => set('creditLimit', +e.target.value)} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">KAM asignado</label>
+            <select className="input w-full" value={form.vendorId} onChange={e => set('vendorId', e.target.value)}>
+              <option value="">Sin asignar</option>
+              {vendors.map(v => <option key={v.id} value={v.id}>{v.name} — {v.zone}</option>)}
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label className="block text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Dirección</label>
+            <input className="input w-full" placeholder="Calle 10 # 5-20, Local 3" value={form.address}
+              onChange={e => set('address', e.target.value)} />
+          </div>
+        </div>
+        {err && <p className="text-[12px] text-risk mt-3">{err}</p>}
+        <div className="flex gap-3 mt-5">
+          <button className="btn-primary flex-1" disabled={saving} onClick={submit}>
+            {saving ? 'Creando…' : 'Crear aliado'}
+          </button>
+          <button className="btn-secondary" onClick={onClose}>Cancelar</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Credentials modal (shown after creation) ───────────────────────────────────
+function CredentialsModal({ client, tempPassword, onClose }: {
+  client: AdminClient; tempPassword: string; onClose: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  const text = `Acceso D'MARIO B2B\nCorreo: ${client.email ?? ''}\nContraseña temporal: ${tempPassword}\nURL: ${window.location.origin}/login`;
+
+  const copy = () => {
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-paper rounded-card shadow-xl w-full max-w-[420px] p-6">
+        <div className="w-12 h-12 rounded-full bg-ok-soft flex items-center justify-center mx-auto mb-4">
+          <span className="text-ok text-[22px]">✓</span>
+        </div>
+        <h3 className="h3 text-center mb-1">Aliado creado</h3>
+        <p className="text-[12px] text-ink-mute text-center mb-5">{client.name}</p>
+
+        <div className="bg-ivory rounded-brand p-4 font-mono text-[12px] mb-4 space-y-1">
+          <p><span className="text-ink-mute">Correo:</span> <strong>{client.email ?? '—'}</strong></p>
+          <p><span className="text-ink-mute">Contraseña:</span> <strong className="text-accent">{tempPassword}</strong></p>
+        </div>
+        <p className="text-[11px] text-ink-mute text-center mb-4">
+          Comparte estas credenciales con el aliado. Puede cambiar su contraseña en Mi cuenta.
+        </p>
+        <div className="flex gap-3">
+          <button className="btn-secondary flex-1" onClick={copy}>
+            {copied ? '✓ Copiado' : 'Copiar credenciales'}
+          </button>
+          <button className="btn-primary flex-1" onClick={onClose}>Listo</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const cop = (n: number) => '$' + Math.round(n).toLocaleString('es-CO');
 
 const STATUS_OPTS = ['', 'activo', 'riesgo', 'inactivo'];
@@ -274,6 +412,17 @@ export default function AdminClients() {
   const [filterStatus, setFilterStatus]   = useState('');
   const [filterSegment, setFilterSegment] = useState('');
   const [detail, setDetail]     = useState<AdminClient | null>(null);
+  const [showNew, setShowNew]   = useState(false);
+  const [created, setCreated]   = useState<{ client: AdminClient; tempPassword: string } | null>(null);
+  // Prefetch vendors once for both drawer + new client modal
+  const ensureVendors = async () => {
+    if (!vendors.length) {
+      const vs = await adminApi.listVendors();
+      setVendors(vs as AdminVendor[]);
+      return vs as AdminVendor[];
+    }
+    return vendors;
+  };
 
   const load = async () => {
     setLoading(true);
@@ -300,6 +449,7 @@ export default function AdminClients() {
           <h1 className="h1 mb-0.5">Clientes</h1>
           <p className="text-[13px] text-ink-mute">{total} aliados registrados</p>
         </div>
+        <button className="btn-primary text-[13px]" onClick={() => setShowNew(true)}>+ Nuevo aliado</button>
       </div>
 
       {/* Filters */}
@@ -378,6 +528,22 @@ export default function AdminClients() {
           onEdit={() => {}}
           onClose={() => setDetail(null)}
           onSaved={() => { load(); setDetail(null); }}
+        />
+      )}
+
+      {showNew && (
+        <NewClientModal
+          vendors={vendors}
+          onCreated={result => { setCreated(result); load(); }}
+          onClose={() => setShowNew(false)}
+        />
+      )}
+
+      {created && (
+        <CredentialsModal
+          client={created.client}
+          tempPassword={created.tempPassword}
+          onClose={() => setCreated(null)}
         />
       )}
     </div>

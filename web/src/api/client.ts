@@ -192,11 +192,12 @@ export interface KamClients {
 
 // ── Admin ─────────────────────────────────────────────────────────────────────
 export const adminApi = {
-  stats: () => req<AdminStats>('/admin/stats'),
+  stats:      () => req<AdminStats>('/admin/stats'),
+  statsTrend: () => req<TrendPoint[]>('/admin/stats/trend'),
   // products
-  listProducts: (page = 1, limit = 30, line?: string, active?: boolean) =>
+  listProducts: (page = 1, limit = 30, line?: string, active?: boolean, lowStock?: boolean) =>
     req<{ meta: PaginatedMeta; data: Product[] }>(
-      `/admin/products?page=${page}&limit=${limit}${line ? `&line=${line}` : ''}${active != null ? `&active=${active}` : ''}`
+      `/admin/products?page=${page}&limit=${limit}${line ? `&line=${line}` : ''}${active != null ? `&active=${active}` : ''}${lowStock ? '&lowStock=true' : ''}`
     ),
   createProduct: (dto: Partial<Product> & { ref: string; name: string; line: string; priceMayo: number; packSize: number; stock: number }) =>
     req<Product>('/admin/products', { method: 'POST', body: JSON.stringify(dto) }),
@@ -207,6 +208,8 @@ export const adminApi = {
     req<{ meta: PaginatedMeta; data: AdminClient[] }>(
       `/admin/clients?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}${segment ? `&segment=${segment}` : ''}`
     ),
+  createClient: (dto: { code: string; name: string; city: string; email: string; segment?: string; creditLimit?: number; vendorId?: string; address?: string }) =>
+    req<{ client: AdminClient; tempPassword: string }>('/admin/clients', { method: 'POST', body: JSON.stringify(dto) }),
   updateClient: (id: string, dto: Partial<{ creditLimit: number; status: string; segment: string; vendorId: string }>) =>
     req<AdminClient>(`/admin/clients/${id}`, { method: 'PATCH', body: JSON.stringify(dto) }),
   // orders
@@ -222,6 +225,8 @@ export const adminApi = {
   intelligence: () => req<IntelligenceData>('/admin/intelligence'),
   treasury:     () => req<TreasuryData>('/admin/treasury'),
 };
+
+export interface TrendPoint { month: string; revenue: number; count: number; }
 
 export interface PaginatedMeta { total: number; page: number; pages: number; }
 

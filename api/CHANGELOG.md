@@ -8,6 +8,21 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ---
 
+## [0.11.0] — 2026-06-21 · Sprint 11: Trend chart, stock alerts, crear aliados
+
+### Backend
+- `GET /admin/stats/trend` — facturación y conteo mensual de pedidos para los últimos 12 meses (GROUP BY mes en PostgreSQL)
+- `GET /admin/products?lowStock=true` — filtra referencias activas con stock < 10
+- `POST /admin/clients` — crea entidad Client + usuario Better Auth con contraseña temporal `DM@{code}2026`; retorna `{ client, tempPassword }`
+- `POST /admin/products` y `PATCH /admin/products/:id` — soporte para campo `imageUrl`
+
+### Frontend
+- `Dashboard.tsx` — gráfico de barras CSS de facturación mensual (hover muestra valor); sección "Stock bajo" con lista de referencias críticas cargadas on-demand; hero de revenue mejorado con totales del período
+- `Products.tsx` — campo `imageUrl` en modal de edición/creación; checkbox "Stock bajo (< 10)" en filtros
+- `Clients.tsx` — botón "+ Nuevo aliado" abre `NewClientModal` con campos código, nombre, ciudad, correo, segmento, cupo, KAM y dirección; al crear muestra `CredentialsModal` con contraseña temporal y botón "Copiar credenciales"
+
+---
+
 ## [0.10.0] — 2026-06-21 · Sprint 10: Correcciones y cliente detalle
 
 ### Fixed
