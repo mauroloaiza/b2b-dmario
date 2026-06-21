@@ -105,11 +105,13 @@ async function seed() {
   await createUser('laura.p@dmario.com',   'kam123',    'Laura P.',             UserRole.KAM,    undefined, vendors[1].id);
   await createUser('carlos.r@dmario.com',  'kam123',    'Carlos R.',            UserRole.KAM,    undefined, vendors[2].id);
   await createUser('maria.l@dmario.com',   'kam123',    'María L.',             UserRole.KAM,    undefined, vendors[3].id);
-  console.log(`✓ 9 usuarios (5 aliados + 4 KAMs)`);
+  await createUser('admin@dmario.com',     'admin2026', 'Admin D\'MARIO',       UserRole.ADMIN);
+  console.log(`✓ 10 usuarios (5 aliados + 4 KAMs + 1 admin)`);
 
   console.log('\n✅ Seed completado.');
   console.log('  Aliado:  esmeralda@aliado.com / aliado123');
   console.log('  KAM:     andres.m@dmario.com  / kam123');
+  console.log('  Admin:   admin@dmario.com     / admin2026');
 
   await ds.destroy();
   await pgPool.end();

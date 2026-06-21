@@ -74,7 +74,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  role: 'aliado' | 'kam';
+  role: 'aliado' | 'kam' | 'admin';
   clientId?: string;
   vendorId?: string;
 }
@@ -174,6 +174,67 @@ export interface KamClients {
     ytd: number; lastOrderAt?: string;
   }[];
 }
+
+// ── Admin ─────────────────────────────────────────────────────────────────────
+export const adminApi = {
+  stats: () => req<AdminStats>('/admin/stats'),
+  // products
+  listProducts: (page = 1, limit = 30, line?: string, active?: boolean) =>
+    req<{ meta: PaginatedMeta; data: Product[] }>(
+      `/admin/products?page=${page}&limit=${limit}${line ? `&line=${line}` : ''}${active != null ? `&active=${active}` : ''}`
+    ),
+  createProduct: (dto: Partial<Product> & { ref: string; name: string; line: string; priceMayo: number; packSize: number; stock: number }) =>
+    req<Product>('/admin/products', { method: 'POST', body: JSON.stringify(dto) }),
+  updateProduct: (id: string, dto: Partial<Product>) =>
+    req<Product>(`/admin/products/${id}`, { method: 'PATCH', body: JSON.stringify(dto) }),
+  // clients
+  listClients: (page = 1, limit = 30, status?: string, segment?: string) =>
+    req<{ meta: PaginatedMeta; data: AdminClient[] }>(
+      `/admin/clients?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}${segment ? `&segment=${segment}` : ''}`
+    ),
+  updateClient: (id: string, dto: Partial<{ creditLimit: number; status: string; segment: string; vendorId: string }>) =>
+    req<AdminClient>(`/admin/clients/${id}`, { method: 'PATCH', body: JSON.stringify(dto) }),
+  // orders
+  listOrders: (page = 1, limit = 30, status?: string, clientId?: string) =>
+    req<{ meta: PaginatedMeta; data: AdminOrder[] }>(
+      `/admin/orders?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}${clientId ? `&clientId=${clientId}` : ''}`
+    ),
+  updateOrderStatus: (id: string, status: string) =>
+    req<AdminOrder>(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  // vendors
+  listVendors: () => req<AdminVendor[]>('/admin/vendors'),
+};
+
+export interface PaginatedMeta { total: number; page: number; pages: number; }
+
+export interface AdminStats {
+  totalProducts: number;
+  activeProducts: number;
+  totalClients: number;
+  totalOrders: number;
+  totalRevenue: number;
+  clientsByStatus: Record<string, number>;
+  ordersByStatus: Record<string, number>;
+}
+
+export interface AdminClient {
+  id: string; code: string; name: string; city: string;
+  segment: string; status: string;
+  creditLimit: number; creditUsed: number;
+  ytd: number; lastOrderAt?: string;
+  address?: string;
+  vendor?: { id: string; name: string; zone: string };
+}
+
+export interface AdminOrder {
+  id: string; code: string; status: string; paymentTerm: string;
+  subtotal: number; discount: number; total: number; createdAt: string;
+  client: { id: string; name: string; city: string };
+  vendor?: { name: string };
+  items: { qty: number; unitPrice: number; lineTotal: number; ref: string; name: string }[];
+}
+
+export interface AdminVendor { id: string; name: string; zone: string; }
 
 export interface KamCommissions {
   period: string;

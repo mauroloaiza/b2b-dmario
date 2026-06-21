@@ -1,6 +1,7 @@
 export enum UserRole {
   ALIADO = 'aliado',
   KAM = 'kam',
+  ADMIN = 'admin',
 }
 
 export enum ClientSegment {

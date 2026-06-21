@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './store/auth';
 import { Topbar } from './components/Topbar';
+import { AdminLayout } from './components/AdminLayout';
 
 import Login          from './pages/Login';
 import Home           from './pages/aliado/Home';
@@ -11,11 +12,19 @@ import Account        from './pages/aliado/Account';
 import KamDashboard   from './pages/kam/Dashboard';
 import KamClients     from './pages/kam/Clients';
 import KamCommissions from './pages/kam/Commissions';
+import AdminDashboard from './pages/admin/Dashboard';
+import AdminProducts  from './pages/admin/Products';
+import AdminClients   from './pages/admin/Clients';
+import AdminOrders    from './pages/admin/Orders';
 
-function RequireAuth({ children, role }: { children: JSX.Element; role?: 'aliado' | 'kam' }) {
+function RequireAuth({ children, role }: { children: JSX.Element; role?: 'aliado' | 'kam' | 'admin' }) {
   const user = useAuth(s => s.user);
   if (!user) return <Navigate to="/login" replace />;
-  if (role && user.role !== role) return <Navigate to={user.role === 'kam' ? '/kam' : '/'} replace />;
+  if (role && user.role !== role) {
+    if (user.role === 'admin') return <Navigate to="/admin" replace />;
+    if (user.role === 'kam')   return <Navigate to="/kam" replace />;
+    return <Navigate to="/" replace />;
+  }
   return children;
 }
 
@@ -31,12 +40,17 @@ function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const user = useAuth(s => s.user);
 
+  const defaultPath = !user ? '/login'
+    : user.role === 'admin' ? '/admin'
+    : user.role === 'kam'   ? '/kam'
+    : '/';
+
   return (
     <BrowserRouter>
       <Routes>
         <Route
           path="/login"
-          element={user ? <Navigate to={user.role === 'kam' ? '/kam' : '/'} replace /> : <Login />}
+          element={user ? <Navigate to={defaultPath} replace /> : <Login />}
         />
 
         {/* Aliado */}
@@ -51,7 +65,13 @@ export default function App() {
         <Route path="/kam/clientes" element={<RequireAuth role="kam"><Layout><KamClients /></Layout></RequireAuth>} />
         <Route path="/kam/comisiones" element={<RequireAuth role="kam"><Layout><KamCommissions /></Layout></RequireAuth>} />
 
-        <Route path="*" element={<Navigate to={user ? (user.role === 'kam' ? '/kam' : '/') : '/login'} replace />} />
+        {/* Admin backoffice */}
+        <Route path="/admin" element={<RequireAuth role="admin"><AdminLayout><AdminDashboard /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/productos" element={<RequireAuth role="admin"><AdminLayout><AdminProducts /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/clientes" element={<RequireAuth role="admin"><AdminLayout><AdminClients /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/pedidos" element={<RequireAuth role="admin"><AdminLayout><AdminOrders /></AdminLayout></RequireAuth>} />
+
+        <Route path="*" element={<Navigate to={defaultPath} replace />} />
       </Routes>
     </BrowserRouter>
   );

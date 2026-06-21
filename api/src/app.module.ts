@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
+import { AdminModule } from './admin/admin.module';
 import { AuthModule } from './auth/auth.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { ClientsModule } from './clients/clients.module';
@@ -41,6 +42,7 @@ import { VendorsModule } from './vendors/vendors.module';
       }]),
       inject: [ConfigService],
     }),
+    AdminModule,
     AuthModule,
     CatalogModule,
     ClientsModule,
