@@ -2,10 +2,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 
 const NAV = [
-  { to: '/admin',          label: 'Dashboard',  icon: '◈' },
-  { to: '/admin/productos',label: 'Productos',   icon: '◷' },
-  { to: '/admin/clientes', label: 'Clientes',    icon: '◉' },
-  { to: '/admin/pedidos',  label: 'Pedidos',     icon: '◎' },
+  { to: '/admin',                label: 'Dashboard',     icon: '◈' },
+  { to: '/admin/productos',      label: 'Productos',     icon: '◷' },
+  { to: '/admin/clientes',       label: 'Clientes',      icon: '◉' },
+  { to: '/admin/pedidos',        label: 'Pedidos',       icon: '◎' },
+  { to: '/admin/inteligencia',   label: 'Inteligencia',  icon: '◬' },
+  { to: '/admin/coordinacion',   label: 'Coordinación',  icon: '⬡' },
+  { to: '/admin/cartera',        label: 'Cartera',       icon: '◆' },
+  { to: '/admin/logistica',      label: 'Logística',     icon: '⟩' },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {

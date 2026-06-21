@@ -203,6 +203,9 @@ export const adminApi = {
     req<AdminOrder>(`/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
   // vendors
   listVendors: () => req<AdminVendor[]>('/admin/vendors'),
+  // intelligence & treasury
+  intelligence: () => req<IntelligenceData>('/admin/intelligence'),
+  treasury:     () => req<TreasuryData>('/admin/treasury'),
 };
 
 export interface PaginatedMeta { total: number; page: number; pages: number; }
@@ -235,6 +238,33 @@ export interface AdminOrder {
 }
 
 export interface AdminVendor { id: string; name: string; zone: string; }
+
+export interface IntelligenceData {
+  totalRevenue: number;
+  top20Count: number;
+  top20Revenue: number;
+  topClients: {
+    id: string; code: string; name: string; city: string;
+    segment: string; status: string; ytd: number;
+    creditLimit: number; creditUsed: number;
+    vendor: { name: string } | null;
+  }[];
+  citySales: { city: string; sales: number }[];
+  segmentation: { counts: Record<string, number>; revenue: Record<string, number> };
+  vendorScoreboard: {
+    id: string; name: string; zone: string;
+    meta: number; real: number;
+    clientsCount: number; activeCount: number; pct: number;
+  }[];
+}
+
+export interface TreasuryData {
+  totalCxC: number;
+  vencida: number;
+  dso: number;
+  aging: { bucket: string; label: string; amount: number; count: number; min: number; max: number }[];
+  topDeudores: { id: string; name: string; city: string; vendorName: string; due: number; oldest: number }[];
+}
 
 export interface KamCommissions {
   period: string;

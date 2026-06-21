@@ -79,4 +79,12 @@ export class AdminController {
   // ── Vendors ────────────────────────────────────────────────────────────────
   @Get('vendors')
   listVendors() { return this.svc.listVendors(); }
+
+  // ── Intelligence ──────────────────────────────────────────────────────────
+  @Get('intelligence')
+  intelligence() { return this.svc.intelligence(); }
+
+  // ── Treasury ──────────────────────────────────────────────────────────────
+  @Get('treasury')
+  treasury() { return this.svc.treasury(); }
 }

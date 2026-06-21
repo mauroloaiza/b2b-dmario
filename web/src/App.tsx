@@ -12,10 +12,15 @@ import Account        from './pages/aliado/Account';
 import KamDashboard   from './pages/kam/Dashboard';
 import KamClients     from './pages/kam/Clients';
 import KamCommissions from './pages/kam/Commissions';
-import AdminDashboard from './pages/admin/Dashboard';
-import AdminProducts  from './pages/admin/Products';
-import AdminClients   from './pages/admin/Clients';
-import AdminOrders    from './pages/admin/Orders';
+import AdminDashboard    from './pages/admin/Dashboard';
+import AdminProducts     from './pages/admin/Products';
+import AdminClients      from './pages/admin/Clients';
+import AdminOrders       from './pages/admin/Orders';
+import AdminIntelligence from './pages/admin/Intelligence';
+import AdminCoordination from './pages/admin/Coordination';
+import AdminTreasury     from './pages/admin/Treasury';
+import AdminLogistics    from './pages/admin/Logistics';
+import KamRoute          from './pages/kam/Route';
 
 function RequireAuth({ children, role }: { children: JSX.Element; role?: 'aliado' | 'kam' | 'admin' }) {
   const user = useAuth(s => s.user);
@@ -65,11 +70,17 @@ export default function App() {
         <Route path="/kam/clientes" element={<RequireAuth role="kam"><Layout><KamClients /></Layout></RequireAuth>} />
         <Route path="/kam/comisiones" element={<RequireAuth role="kam"><Layout><KamCommissions /></Layout></RequireAuth>} />
 
+        <Route path="/kam/ruta" element={<RequireAuth role="kam"><Layout><KamRoute /></Layout></RequireAuth>} />
+
         {/* Admin backoffice */}
         <Route path="/admin" element={<RequireAuth role="admin"><AdminLayout><AdminDashboard /></AdminLayout></RequireAuth>} />
         <Route path="/admin/productos" element={<RequireAuth role="admin"><AdminLayout><AdminProducts /></AdminLayout></RequireAuth>} />
         <Route path="/admin/clientes" element={<RequireAuth role="admin"><AdminLayout><AdminClients /></AdminLayout></RequireAuth>} />
         <Route path="/admin/pedidos" element={<RequireAuth role="admin"><AdminLayout><AdminOrders /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/inteligencia" element={<RequireAuth role="admin"><AdminLayout><AdminIntelligence /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/coordinacion" element={<RequireAuth role="admin"><AdminLayout><AdminCoordination /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/cartera" element={<RequireAuth role="admin"><AdminLayout><AdminTreasury /></AdminLayout></RequireAuth>} />
+        <Route path="/admin/logistica" element={<RequireAuth role="admin"><AdminLayout><AdminLogistics /></AdminLayout></RequireAuth>} />
 
         <Route path="*" element={<Navigate to={defaultPath} replace />} />
       </Routes>

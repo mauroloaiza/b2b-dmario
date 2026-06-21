@@ -39,6 +39,7 @@ export function Topbar() {
           <Link to="/kam"              className={is('/kam')              ? 'tb-link-active' : 'tb-link'}>Dashboard</Link>
           <Link to="/kam/clientes"     className={is('/kam/clientes')     ? 'tb-link-active' : 'tb-link'}>Mis clientes</Link>
           <Link to="/kam/comisiones"   className={is('/kam/comisiones')   ? 'tb-link-active' : 'tb-link'}>Comisiones</Link>
+          <Link to="/kam/ruta"         className={is('/kam/ruta')         ? 'tb-link-active' : 'tb-link'}>Mi ruta</Link>
         </nav>
       )}
 

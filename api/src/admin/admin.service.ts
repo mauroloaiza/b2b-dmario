@@ -148,4 +148,114 @@ export class AdminService {
   async listVendors() {
     return this.vendors.find({ order: { name: 'ASC' } });
   }
+
+  // ── Intelligence 80/20 ────────────────────────────────────────────────────
+  async intelligence() {
+    const [allClients, vendors] = await Promise.all([
+      this.clients.find({ order: { ytd: 'DESC' }, relations: { vendor: true } }),
+      this.vendors.find({ order: { real: 'DESC' } }),
+    ]);
+
+    const totalRevenue = allClients.reduce((s, c) => s + Number(c.ytd), 0);
+    const sorted = [...allClients].sort((a, b) => Number(b.ytd) - Number(a.ytd));
+
+    // 80/20 split
+    let cumulative = 0;
+    let top20Count = 0;
+    for (const c of sorted) {
+      cumulative += Number(c.ytd);
+      top20Count++;
+      if (cumulative >= totalRevenue * 0.8) break;
+    }
+
+    // City aggregation
+    const cityMap = new Map<string, number>();
+    for (const c of allClients) {
+      cityMap.set(c.city, (cityMap.get(c.city) ?? 0) + Number(c.ytd));
+    }
+    const citySales = [...cityMap.entries()]
+      .map(([city, sales]) => ({ city, sales }))
+      .sort((a, b) => b.sales - a.sales)
+      .slice(0, 8);
+
+    // Segmentation
+    const seg = { A: 0, B: 0, C: 0 };
+    const segRevenue = { A: 0, B: 0, C: 0 };
+    for (const c of allClients) {
+      seg[c.segment as 'A' | 'B' | 'C']++;
+      segRevenue[c.segment as 'A' | 'B' | 'C'] += Number(c.ytd);
+    }
+
+    return {
+      totalRevenue,
+      top20Count,
+      top20Revenue: sorted.slice(0, top20Count).reduce((s, c) => s + Number(c.ytd), 0),
+      topClients: sorted.slice(0, 15).map(c => ({
+        id: c.id, code: c.code, name: c.name, city: c.city,
+        segment: c.segment, status: c.status,
+        ytd: Number(c.ytd), creditLimit: Number(c.creditLimit),
+        creditUsed: Number(c.creditUsed),
+        vendor: c.vendor ? { name: c.vendor.name } : null,
+      })),
+      citySales,
+      segmentation: { counts: seg, revenue: segRevenue },
+      vendorScoreboard: vendors.map(v => ({
+        id: v.id, name: v.name, zone: v.zone,
+        meta: Number(v.meta), real: Number(v.real),
+        clientsCount: v.clientsCount, activeCount: v.activeCount,
+        pct: v.meta > 0 ? Math.round(Number(v.real) / Number(v.meta) * 100) : 0,
+      })),
+    };
+  }
+
+  // ── Treasury ──────────────────────────────────────────────────────────────
+  async treasury() {
+    const invoices = await this.orders
+      .createQueryBuilder('o')
+      .leftJoinAndSelect('o.client', 'c')
+      .leftJoinAndSelect('o.vendor', 'v')
+      .where('o.total > 0')
+      .orderBy('o.createdAt', 'DESC')
+      .getMany();
+
+    const now = new Date();
+
+    const aging = [
+      { bucket: 'Corriente',  label: '0 días',   min: -Infinity, max: 0   },
+      { bucket: '1 – 30',     label: 'vencidos',  min: 1,         max: 30  },
+      { bucket: '31 – 60',    label: 'vencidos',  min: 31,        max: 60  },
+      { bucket: '61 – 90',    label: 'vencidos',  min: 61,        max: 90  },
+      { bucket: '+ 90',       label: 'jurídico',  min: 91,        max: Infinity },
+    ].map(b => ({ ...b, amount: 0, count: 0 }));
+
+    const clientDebt = new Map<string, { name: string; city: string; vendorName: string; due: number; oldest: number }>();
+
+    for (const o of invoices) {
+      const daysOld = Math.floor((now.getTime() - new Date(o.createdAt).getTime()) / 86400000);
+      const bucket = aging.find(b => daysOld >= b.min && daysOld <= b.max);
+      if (bucket) { bucket.amount += Number(o.total); bucket.count++; }
+
+      if (o.client) {
+        const key = o.client.id;
+        const existing = clientDebt.get(key);
+        if (!existing) {
+          clientDebt.set(key, { name: o.client.name, city: o.client.city, vendorName: o.vendor?.name ?? '—', due: Number(o.total), oldest: daysOld });
+        } else {
+          existing.due += Number(o.total);
+          existing.oldest = Math.max(existing.oldest, daysOld);
+        }
+      }
+    }
+
+    const topDeudores = [...clientDebt.entries()]
+      .map(([id, d]) => ({ id, ...d }))
+      .sort((a, b) => b.due - a.due)
+      .slice(0, 8);
+
+    const totalCxC = aging.reduce((s, b) => s + b.amount, 0);
+    const vencida  = aging.filter(b => b.min > 0).reduce((s, b) => s + b.amount, 0);
+    const dso      = totalCxC > 0 ? Math.round((aging[0].amount * 45 + aging[1].amount * 15 + aging[2].amount * 45 + aging[3].amount * 75 + aging[4].amount * 105) / totalCxC) : 0;
+
+    return { totalCxC, vencida, dso, aging, topDeudores };
+  }
 }
