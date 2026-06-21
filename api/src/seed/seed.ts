@@ -1,20 +1,21 @@
 import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
 import { join } from 'path';
+import { v4 as uuid } from 'uuid';
 
 config({ path: join(__dirname, '../../.env') });
 
 // Better Auth — debe inicializarse antes de usarse
 import { auth, pgPool } from '../auth/auth.instance';
-import { Vendor } from '../vendors/vendor.entity';
-import { Client } from '../clients/client.entity';
+import { Vendor }  from '../vendors/vendor.entity';
+import { Client }  from '../clients/client.entity';
 import { Product } from '../catalog/product.entity';
-import { ClientSegment, ClientStatus, ProductBadge, UserRole } from '../common/enums';
+import { ClientSegment, ClientStatus, OrderStatus, PaymentTerm, ProductBadge, UserRole } from '../common/enums';
 
 const ds = new DataSource({
   type: 'postgres',
-  host: process.env.DB_HOST ?? 'localhost',
-  port: +(process.env.DB_PORT ?? '5432'),
+  host:     process.env.DB_HOST ?? 'localhost',
+  port:     +(process.env.DB_PORT ?? '5432'),
   database: process.env.DB_NAME ?? 'dmario_b2b',
   username: process.env.DB_USER ?? 'dmario',
   password: process.env.DB_PASS ?? 'dmario_dev_2026',
@@ -24,34 +25,33 @@ const ds = new DataSource({
 
 async function createUser(email: string, password: string, name: string, role: UserRole, clientId?: string, vendorId?: string) {
   return auth.api.signUpEmail({
-    body: {
-      email,
-      password,
-      name,
-      role,
-      ...(clientId ? { clientId } : {}),
-      ...(vendorId ? { vendorId } : {}),
+    body: { email, password, name, role,
+      ...(clientId  ? { clientId }  : {}),
+      ...(vendorId  ? { vendorId }  : {}),
     },
   });
 }
+
+/** Devuelve una Date con N días en el pasado */
+const daysAgo = (n: number) => {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+};
 
 async function seed() {
   await ds.initialize();
   console.log("🌱 Iniciando seed D'MARIO B2B...");
 
-  // Secuencia para códigos P-XXXX (idempotente)
   await ds.query(`CREATE SEQUENCE IF NOT EXISTS order_code_seq START 1`);
-
-  // Better Auth auto-migra sus tablas (user, session, account, verification)
-  // Las entidades de negocio las gestiona TypeORM con synchronize:true
 
   // --- VENDORS ---
   const vendorRepo = ds.getRepository(Vendor);
   const vendors = await vendorRepo.save([
-    { name: 'Andrés M.', zone: 'Cundinamarca · Boyacá',    meta: 80000000, real: 82100000, clientsCount: 96, activeCount: 79, email: 'andres.m@dmario.com', phone: '312 445 8890' },
-    { name: 'Laura P.',  zone: 'Antioquia · Eje Cafetero', meta: 75000000, real: 68400000, clientsCount: 84, activeCount: 71, email: 'laura.p@dmario.com',  phone: '314 222 1234' },
-    { name: 'Carlos R.', zone: 'Caribe',                   meta: 65000000, real: 51200000, clientsCount: 72, activeCount: 58, email: 'carlos.r@dmario.com', phone: '315 888 5678' },
-    { name: 'María L.',  zone: 'Valle · Sur',              meta: 55000000, real: 49800000, clientsCount: 64, activeCount: 55, email: 'maria.l@dmario.com',  phone: '316 777 9090' },
+    { name: 'Andrés M.', zone: 'Cundinamarca · Boyacá',    meta: 80000000, real: 82100000, clientsCount: 96, activeCount: 79, email: 'andres.m@dmario.com', phone: '3124458890' },
+    { name: 'Laura P.',  zone: 'Antioquia · Eje Cafetero', meta: 75000000, real: 68400000, clientsCount: 84, activeCount: 71, email: 'laura.p@dmario.com',  phone: '3142221234' },
+    { name: 'Carlos R.', zone: 'Caribe',                   meta: 65000000, real: 51200000, clientsCount: 72, activeCount: 58, email: 'carlos.r@dmario.com', phone: '3158885678' },
+    { name: 'María L.',  zone: 'Valle · Sur',              meta: 55000000, real: 49800000, clientsCount: 64, activeCount: 55, email: 'maria.l@dmario.com',  phone: '3167779090' },
   ]);
   console.log(`✓ ${vendors.length} vendedores`);
 
@@ -78,7 +78,7 @@ async function seed() {
 
   // --- PRODUCTS ---
   const productRepo = ds.getRepository(Product);
-  await productRepo.save([
+  const products = await productRepo.save([
     { ref: 'DM-2451', name: 'Lyon Acero Plata',    line: 'Lyon',   priceMayo: 619900,  packSize: 6, stock: 124, badge: ProductBadge.TOP,     active: true },
     { ref: 'DM-2455', name: 'Lyon Acero Oro Rosa', line: 'Lyon',   priceMayo: 689900,  packSize: 6, stock: 86,  badge: null,                 active: true },
     { ref: 'DM-2460', name: 'Lyon Esfera Negra',   line: 'Lyon',   priceMayo: 619900,  packSize: 6, stock: 9,   badge: ProductBadge.BAJO,    active: true },
@@ -93,6 +93,73 @@ async function seed() {
     { ref: 'DM-6025', name: 'Bern Sport Azul',     line: 'Bern',   priceMayo: 289900,  packSize: 8, stock: 156, badge: null,                 active: true },
   ]);
   console.log(`✓ 12 productos`);
+
+  // --- HISTORICAL ORDERS (para recompra inteligente) ---
+  // Usar raw SQL para controlar created_at con fechas pasadas
+  const [lyon, lyonOro, , genevaCafe, , genevaNacar, zurich, , , , bern, bernAzul] = products;
+
+  // Patrón de compra por cliente: [clientIdx, productId, qty, daysAgo, paymentTerm, status]
+  const historicalOrders: Array<{
+    clientIdx: number;
+    lines: { product: Product; qty: number }[];
+    daysAgo: number;
+    paymentTerm: PaymentTerm;
+    status: OrderStatus;
+  }> = [
+    // Joyería La Esmeralda — ciclo ~18 días en Lyon + Geneva
+    { clientIdx: 0, lines: [{ product: lyon, qty: 12 }, { product: genevaCafe, qty: 6 }],   daysAgo: 108, paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 0, lines: [{ product: lyon, qty: 12 }, { product: genevaNacar, qty: 6 }],  daysAgo: 90,  paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 0, lines: [{ product: lyon, qty: 6 },  { product: bern, qty: 8 }],         daysAgo: 72,  paymentTerm: PaymentTerm.PRONTO_PAGO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 0, lines: [{ product: lyon, qty: 12 }, { product: genevaCafe, qty: 12 }],  daysAgo: 54,  paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 0, lines: [{ product: lyon, qty: 12 }, { product: lyonOro, qty: 6 }],      daysAgo: 36,  paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 0, lines: [{ product: lyon, qty: 12 }, { product: bern, qty: 16 }],        daysAgo: 18,  paymentTerm: PaymentTerm.CONTADO,    status: OrderStatus.EN_RUTA   },
+
+    // Relojería El Tiempo — ciclo ~21 días en Geneva + Zürich
+    { clientIdx: 1, lines: [{ product: genevaCafe, qty: 12 }, { product: zurich, qty: 4 }], daysAgo: 105, paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 1, lines: [{ product: genevaCafe, qty: 6 },  { product: zurich, qty: 4 }], daysAgo: 84,  paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 1, lines: [{ product: genevaCafe, qty: 12 }, { product: genevaNacar, qty: 6 }], daysAgo: 63, paymentTerm: PaymentTerm.PRONTO_PAGO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 1, lines: [{ product: genevaCafe, qty: 12 }, { product: zurich, qty: 8 }], daysAgo: 42,  paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ENTREGADO },
+    { clientIdx: 1, lines: [{ product: genevaCafe, qty: 12 }, { product: bernAzul, qty: 8 }],daysAgo: 21, paymentTerm: PaymentTerm.CREDITO_90, status: OrderStatus.ALISTANDO },
+
+    // Distribuidora Andina — ciclo ~28 días en Bern + Lyon
+    { clientIdx: 3, lines: [{ product: bern, qty: 16 }, { product: lyon, qty: 6 }],          daysAgo: 112, paymentTerm: PaymentTerm.CONTADO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 3, lines: [{ product: bern, qty: 24 }, { product: bernAzul, qty: 8 }],      daysAgo: 84,  paymentTerm: PaymentTerm.CONTADO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 3, lines: [{ product: bern, qty: 16 }, { product: lyon, qty: 12 }],         daysAgo: 56,  paymentTerm: PaymentTerm.CONTADO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 3, lines: [{ product: bern, qty: 24 }, { product: genevaCafe, qty: 6 }],    daysAgo: 28,  paymentTerm: PaymentTerm.CONTADO, status: OrderStatus.EN_RUTA   },
+
+    // Joyería Mónaco — ciclo ~30 días en Geneva + Alpes
+    { clientIdx: 4, lines: [{ product: genevaNacar, qty: 6 }],                               daysAgo: 90,  paymentTerm: PaymentTerm.PRONTO_PAGO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 4, lines: [{ product: genevaNacar, qty: 6 }, { product: genevaCafe, qty: 6 }], daysAgo: 60, paymentTerm: PaymentTerm.PRONTO_PAGO, status: OrderStatus.ENTREGADO },
+    { clientIdx: 4, lines: [{ product: genevaNacar, qty: 6 }, { product: bern, qty: 8 }],    daysAgo: 30,  paymentTerm: PaymentTerm.PRONTO_PAGO, status: OrderStatus.ENTREGADO },
+  ];
+
+  let orderNum = 1000;
+  for (const o of historicalOrders) {
+    const client  = clients[o.clientIdx];
+    const subtotal = o.lines.reduce((s, l) => s + Number(l.product.priceMayo) * l.qty, 0);
+    const discountRate = o.paymentTerm === PaymentTerm.CONTADO ? 0.08 : o.paymentTerm === PaymentTerm.PRONTO_PAGO ? 0.05 : 0;
+    const discount = Math.round(subtotal * discountRate);
+    const total    = subtotal - discount;
+    const orderId  = uuid();
+    const code     = `P-${String(orderNum++).padStart(4, '0')}`;
+    const orderDate = daysAgo(o.daysAgo);
+    const vendorId  = client.vendor?.id ?? null;
+
+    await ds.query(
+      `INSERT INTO orders (id, code, client_id, vendor_id, payment_term, subtotal, discount, total, status, created_at)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+      [orderId, code, client.id, vendorId, o.paymentTerm, subtotal, discount, total, o.status, orderDate],
+    );
+
+    for (const line of o.lines) {
+      await ds.query(
+        `INSERT INTO order_items (id, order_id, product_id, qty, unit_price, line_total)
+         VALUES ($1,$2,$3,$4,$5,$6)`,
+        [uuid(), orderId, line.product.id, line.qty, Number(line.product.priceMayo), Number(line.product.priceMayo) * line.qty],
+      );
+    }
+  }
+  console.log(`✓ ${historicalOrders.length} pedidos históricos (recompra seed)`);
 
   // --- USERS via Better Auth ---
   console.log('Creando usuarios con Better Auth...');

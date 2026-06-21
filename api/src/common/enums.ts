@@ -31,9 +31,12 @@ export enum PaymentTerm {
 }
 
 export enum OrderStatus {
-  ALISTAMIENTO = 'alistamiento',
-  DESPACHO = 'despacho',
-  ENTREGADO = 'entregado',
+  PENDIENTE  = 'pendiente',
+  CONFIRMADO = 'confirmado',
+  ALISTANDO  = 'alistando',
+  EN_RUTA    = 'en_ruta',
+  ENTREGADO  = 'entregado',
+  CANCELADO  = 'cancelado',
 }
 
 export enum InvoiceStatus {

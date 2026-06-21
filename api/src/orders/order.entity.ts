@@ -35,7 +35,7 @@ export class Order {
   @Column({ type: 'bigint' })
   total: number;
 
-  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.ALISTAMIENTO })
+  @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.ALISTANDO })
   status: OrderStatus;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true, eager: true })

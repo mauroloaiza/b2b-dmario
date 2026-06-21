@@ -5,9 +5,10 @@ import type { Transporter } from 'nodemailer';
 const cop = (n: number) => '$' + Math.round(n).toLocaleString('es-CO');
 
 const STATUS_MSG: Record<string, { label: string; detail: string }> = {
-  alistamiento: { label: 'En alistamiento',  detail: 'Estamos preparando tu pedido con cuidado.' },
-  despacho:     { label: 'En camino',         detail: 'Tu pedido salió de bodega y está en camino.' },
-  entregado:    { label: '¡Entregado!',       detail: 'Tu pedido llegó. ¡Gracias por confiar en D\'MARIO!' },
+  confirmado: { label: 'Pedido confirmado',  detail: 'Recibimos tu pedido y lo estamos procesando.' },
+  alistando:  { label: 'En alistamiento',    detail: 'Estamos preparando tu pedido con cuidado.' },
+  en_ruta:    { label: 'En camino',          detail: 'Tu pedido salió de bodega y está en camino.' },
+  entregado:  { label: '¡Entregado!',        detail: 'Tu pedido llegó. ¡Gracias por confiar en D\'MARIO!' },
 };
 
 @Injectable()

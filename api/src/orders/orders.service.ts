@@ -102,7 +102,7 @@ export class OrdersService {
         subtotal,
         discount,
         total,
-        status: OrderStatus.ALISTAMIENTO,
+        status: OrderStatus.ALISTANDO,
       });
       await em.save(Order, order);
 

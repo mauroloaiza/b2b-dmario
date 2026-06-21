@@ -8,6 +8,28 @@ Formato: [Keep a Changelog](https://keepachangelog.com/es/1.0.0/)
 
 ---
 
+## [0.9.0] — 2026-06-20 · Sprint 9: OrderStatus, Topbar, Catálogo sidebar, CI
+
+### Backend
+- `OrderStatus` enum expandido de 3 a 6 valores: `pendiente | confirmado | alistando | en_ruta | entregado | cancelado`
+- Migración `20260621000000-OrderStatusExpand`: agrega nuevos valores al tipo PG vía `DO $$ … EXCEPTION WHEN duplicate_object $$`, migra filas existentes (`alistamiento→alistando`, `despacho→en_ruta`), actualiza `DEFAULT` de la columna
+- `order.entity.ts`: default cambiado a `OrderStatus.ALISTANDO`
+- `orders.service.ts`: status de creación actualizado a `OrderStatus.ALISTANDO`
+- `notifications.service.ts`: claves `STATUS_MSG` actualizadas a `confirmado | alistando | en_ruta | entregado`
+- `seed.ts`: 18 órdenes históricas con `created_at` controlado vía raw SQL y helper `daysAgo(n)` — 4 clientes con ciclos realistas de 18–30 días para alimentar "Recompra inteligente"
+
+### Frontend
+- `Topbar.tsx` rediseño aliado: búsqueda con navegación a `/catalogo?q=`, indicador de cupo con barra de color, carrito con badge de unidades en acento naranja, avatar con iniciales
+- `store/clientStore.ts` — nuevo store Zustand para datos del cliente aliado; carga lazy en Topbar (una sola vez por sesión)
+- `Catalog.tsx` — sidebar de filtros: checkboxes por Línea con contador, checkboxes por Etiqueta (badge), buscador en sidebar, toggle de filtros en mobile; modal de detalle con calculadora de margen deslizable
+- `Confirmation.tsx` — STATUS_STEPS ya usa claves nuevas (`confirmado | alistando | en_ruta | entregado`)
+- `Account.tsx` — `STATUS_LABEL` y `STATUS_PILL` cubren los 6 valores del enum nuevo
+
+### DevOps
+- `.github/workflows/ci.yml` — pipeline GitHub Actions: jobs separados para `api` y `web`, cada uno con `npm ci → tsc --noEmit → npm run build` sobre Node 20
+
+---
+
 ## [0.8.0] — 2026-06-20 · Sprint 8: Mi cuenta
 
 ### Added
