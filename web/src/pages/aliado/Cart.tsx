@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../store/cart';
-import { ordersApi, type PreviewReq } from '../../api/client';
+import { ordersApi, clientsApi, type PreviewReq, type ClientMe } from '../../api/client';
 import { WatchGlyph } from '../../components/WatchGlyph';
 
 const cop = (n: number) => '$' + Math.round(n).toLocaleString('es-CO');
@@ -17,13 +17,20 @@ export default function Cart() {
   const [term, setTerm]           = useState<'contado' | 'pronto_pago' | 'credito90'>('credito90');
   const [loading, setLoading]     = useState(false);
   const [error, setError]         = useState('');
+  const [client, setClient]       = useState<ClientMe | null>(null);
   const navigate                  = useNavigate();
+
+  useEffect(() => {
+    clientsApi.me().then(setClient).catch(() => null);
+  }, []);
 
   const list     = Object.values(items);
   const subtotal = list.reduce((s, i) => s + i.product.priceMayo * i.qty, 0);
   const t        = TERMS.find(x => x.id === term)!;
   const desc     = Math.round(subtotal * t.discount / 100);
   const total    = subtotal - desc;
+
+  const cupoOk = term !== 'credito90' || !client || total <= client.creditAvailable;
 
   if (list.length === 0) {
     return (
@@ -148,14 +155,35 @@ export default function Cart() {
             <p className="text-[11px] text-ink-mute">IVA incluido en los precios</p>
           </div>
 
+          {/* Entrega */}
+          {client && (
+            <div className="border border-rule rounded-brand px-4 py-3 text-[12px] text-ink-soft">
+              <p className="text-[11px] font-semibold text-ink-mute uppercase tracking-wide mb-1">Entrega</p>
+              <p className="text-ink font-medium">{client.name} · {client.city}</p>
+              <p className="mt-0.5">Despacho en 24–48 h · llega en 2–4 días hábiles · envío incluido</p>
+            </div>
+          )}
+
+          {/* Cupo alert */}
+          {term === 'credito90' && client && (
+            <div className={`rounded-brand px-3 py-2 text-[12px] font-medium
+                            ${cupoOk
+                              ? 'bg-ok-soft text-ok'
+                              : 'bg-risk-soft text-risk'}`}>
+              {cupoOk
+                ? `✓ Dentro de tu cupo · disponible ${cop(client.creditAvailable)}`
+                : `Tu cupo disponible es ${cop(client.creditAvailable)}. Reduce el pedido o elige contado / pronto pago.`}
+            </div>
+          )}
+
           {error && (
             <p className="text-[12px] text-risk bg-risk-soft rounded-brand px-3 py-2">{error}</p>
           )}
 
           <button
-            className="btn-primary w-full"
+            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={confirm}
-            disabled={loading}
+            disabled={loading || !cupoOk}
           >
             {loading ? 'Confirmando…' : 'Confirmar pedido'}
           </button>

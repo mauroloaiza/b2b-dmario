@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ordersApi, invoicesApi, type Order, type Invoice } from '../../api/client';
+import { useCart } from '../../store/cart';
 import { Spinner, PageError } from '../../components/Spinner';
 
 const cop = (n: number) => '$' + Math.round(n).toLocaleString('es-CO');
@@ -22,6 +24,9 @@ export default function Account() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
+  const [repeating, setRepeating] = useState<string | null>(null);
+  const navigate                = useNavigate();
+  const clear                   = useCart(s => s.clear);
 
   useEffect(() => {
     Promise.all([ordersApi.list(), invoicesApi.me()])
@@ -29,6 +34,19 @@ export default function Account() {
       .catch(() => setError('Error cargando datos.'))
       .finally(() => setLoading(false));
   }, []);
+
+  const repeatOrder = async (orderId: string) => {
+    setRepeating(orderId);
+    try {
+      await ordersApi.repeat(orderId);
+      navigate('/pedido');
+    } catch {
+      // repeat endpoint loads items into a new cart; on error just go to catalog
+      navigate('/catalogo');
+    } finally {
+      setRepeating(null);
+    }
+  };
 
   if (loading) return <Spinner />;
   if (error)   return <PageError message={error} />;
@@ -65,8 +83,17 @@ export default function Account() {
                       {' · '}{TERM_LABEL[o.paymentTerm] ?? o.paymentTerm}
                     </p>
                   </div>
-                  <div className="text-right flex-shrink-0">
+                  <div className="text-right flex-shrink-0 flex flex-col items-end gap-1.5">
                     <p className="font-display font-semibold text-[14px] text-ink">{cop(o.total)}</p>
+                    <button
+                      className="text-[11px] font-medium text-green border border-green/40
+                                 rounded-brand px-2.5 py-1 hover:bg-green hover:text-ivory
+                                 transition-colors disabled:opacity-50"
+                      disabled={repeating === o.id}
+                      onClick={() => repeatOrder(o.id)}
+                    >
+                      {repeating === o.id ? '…' : 'Repetir'}
+                    </button>
                   </div>
                 </div>
               ))
