@@ -144,7 +144,7 @@ export class OrdersService {
       await em.save(Invoice, invoice);
 
       const result = {
-        orderId:     order.id,
+        id:          order.id,
         code:        order.code,
         paymentTerm: order.paymentTerm,
         subtotal,
@@ -310,7 +310,7 @@ export class OrdersService {
 
   private toOrderDto(o: Order) {
     return {
-      orderId:     o.id,
+      id:          o.id,
       code:        o.code,
       paymentTerm: o.paymentTerm,
       subtotal:    Number(o.subtotal),
