@@ -50,6 +50,7 @@ export const ordersApi = {
     req<PaginatedOrders>(`/orders?page=${page}&limit=${limit}${status ? `&status=${status}` : ''}`),
   repeat: (orderId: string) =>
     req<Order>(`/orders/${orderId}/repeat`, { method: 'POST' }),
+  recompra: () => req<RecompraItem[]>('/orders/recompra'),
 };
 
 // ── Invoices ──────────────────────────────────────────────────────────────────
@@ -130,6 +131,20 @@ export interface Order {
   status: string;
   createdAt: string;
   items: PreviewRes['items'];
+}
+
+export interface RecompraItem {
+  productId: string;
+  ref: string;
+  name: string;
+  priceMayo: number;
+  packSize: number;
+  imageUrl: string | null;
+  orderCount: number;
+  avgCycleDays: number;
+  daysSinceLastOrder: number;
+  suggestedQty: number;
+  tocaPedir: boolean;
 }
 
 export interface PaginatedOrders {

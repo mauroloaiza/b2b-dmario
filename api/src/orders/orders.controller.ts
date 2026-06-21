@@ -29,6 +29,12 @@ export class OrdersController {
     });
   }
 
+  @Get('recompra')
+  recompra(@Req() req: Request) {
+    const user = (req as any).user;
+    return this.service.recompra(user.clientId);
+  }
+
   @Post('preview')
   preview(@Body() dto: CreateOrderDto, @Req() req: Request) {
     const user = (req as any).user;

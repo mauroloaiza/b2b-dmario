@@ -214,6 +214,72 @@ export class OrdersService {
     return this.create(dto, clientId);
   }
 
+  // ── RECOMPRA ─────────────────────────────────────────────────────────────
+  async recompra(clientId: string) {
+    const orders = await this.orderRepo.find({
+      where:     { client: { id: clientId } },
+      relations: { items: { product: true } },
+      order:     { createdAt: 'ASC' },
+    });
+
+    const active = orders.filter(o => (o.status as string) !== 'cancelado');
+    if (active.length === 0) return [];
+
+    const map = new Map<string, { product: any; dates: Date[]; totalQty: number }>();
+
+    for (const order of active) {
+      for (const item of order.items) {
+        const p = item.product;
+        if (!map.has(p.id)) map.set(p.id, { product: p, dates: [], totalQty: 0 });
+        const e = map.get(p.id)!;
+        e.dates.push(new Date(order.createdAt));
+        e.totalQty += item.qty;
+      }
+    }
+
+    const now = new Date();
+
+    const results = [...map.values()].map(({ product: p, dates, totalQty }) => {
+      const sorted       = [...dates].sort((a, b) => a.getTime() - b.getTime());
+      const lastDate     = sorted[sorted.length - 1];
+      const daysSince    = Math.floor((now.getTime() - lastDate.getTime()) / 86400000);
+
+      let avgCycle = 30;
+      if (sorted.length >= 2) {
+        const diffs = sorted.slice(1).map((d, i) =>
+          Math.floor((d.getTime() - sorted[i].getTime()) / 86400000),
+        );
+        avgCycle = Math.max(7, Math.round(diffs.reduce((s, d) => s + d, 0) / diffs.length));
+      }
+
+      const urgency  = daysSince / avgCycle;
+      const tocaPedir = daysSince >= Math.round(avgCycle * 0.85);
+
+      return {
+        productId:        p.id,
+        ref:              p.ref,
+        name:             p.name,
+        priceMayo:        Number(p.priceMayo),
+        packSize:         p.packSize as number,
+        imageUrl:         p.imageUrl ?? null,
+        orderCount:       dates.length,
+        avgCycleDays:     avgCycle,
+        daysSinceLastOrder: daysSince,
+        suggestedQty:     p.packSize as number,
+        tocaPedir,
+        urgency,
+      };
+    });
+
+    return results
+      .sort((a, b) => {
+        if (a.tocaPedir !== b.tocaPedir) return b.tocaPedir ? 1 : -1;
+        return b.urgency - a.urgency;
+      })
+      .slice(0, 8)
+      .map(({ urgency: _, ...r }) => r);
+  }
+
   // ── HELPERS ───────────────────────────────────────────────────────────────
   private async calcTotals(dto: CreateOrderDto) {
     const lines: {
