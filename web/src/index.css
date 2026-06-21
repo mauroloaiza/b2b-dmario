@@ -1,0 +1,155 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  html { font-size: 15px; }
+  body {
+    margin: 0;
+    background: #F4F2EC;
+    font-family: 'Hanken Grotesk', sans-serif;
+    color: #1A1F1D;
+    -webkit-font-smoothing: antialiased;
+  }
+  #root { min-height: 100svh; }
+  h1,h2,h3,h4 {
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    line-height: 1.15;
+  }
+  p { margin: 0; }
+  input, select, textarea, button { font-family: inherit; }
+}
+
+@layer components {
+  /* ── Typography ────────────────────────────────────────── */
+  .eyebrow {
+    @apply font-display text-[10.5px] font-semibold tracking-[0.22em] uppercase text-ink-mute;
+  }
+  .eyebrow-gold {
+    @apply font-display text-[10.5px] font-semibold tracking-[0.22em] uppercase text-gold;
+  }
+  .h1 {
+    @apply font-display text-[28px] font-semibold text-ink leading-tight;
+  }
+  .h2 {
+    @apply font-display text-[20px] font-semibold text-ink;
+  }
+  .h3 {
+    @apply font-display text-[16px] font-semibold text-ink;
+  }
+  .mono {
+    @apply font-mono text-[11px] text-ink-mute tracking-tight;
+  }
+
+  /* ── Buttons ───────────────────────────────────────────── */
+  .btn-primary {
+    @apply bg-accent text-white font-display font-semibold text-[13px] tracking-[0.04em]
+           px-5 min-h-[44px] rounded-brand border-0 cursor-pointer
+           hover:bg-[#CC4900] active:bg-[#B84000] transition-colors;
+  }
+  .btn-secondary {
+    @apply bg-transparent text-green border border-green font-display font-semibold text-[13px]
+           px-5 min-h-[44px] rounded-brand cursor-pointer
+           hover:bg-green hover:text-ivory transition-colors;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-ink-soft font-sans text-[13px] px-3 min-h-[36px]
+           rounded-brand cursor-pointer hover:text-ink transition-colors border-0;
+  }
+  .link-btn {
+    @apply bg-transparent border-0 text-green text-[13px] font-medium cursor-pointer
+           hover:underline p-0;
+  }
+
+  /* ── Inputs ────────────────────────────────────────────── */
+  .input {
+    @apply w-full border border-rule bg-paper text-ink text-[14px]
+           px-3 h-[44px] rounded-brand outline-none
+           focus:border-green-soft focus:ring-1 focus:ring-green-soft transition-colors;
+  }
+  .select {
+    @apply input appearance-none cursor-pointer;
+  }
+
+  /* ── Cards ─────────────────────────────────────────────── */
+  .card {
+    @apply bg-paper border border-rule rounded-card p-5;
+  }
+
+  /* ── Topbar ────────────────────────────────────────────── */
+  .topbar {
+    @apply fixed top-0 inset-x-0 z-50 bg-green h-14 flex items-center px-5 gap-6;
+  }
+  .tb-logo {
+    @apply h-8 w-auto flex-shrink-0;
+  }
+  .tb-nav {
+    @apply flex items-center gap-1 flex-1;
+  }
+  .tb-link {
+    @apply btn-ghost text-gold/70 hover:text-ivory text-[12.5px] font-display font-medium
+           tracking-[0.03em] px-3 min-h-[36px];
+  }
+  .tb-link-active {
+    @apply tb-link text-ivory;
+  }
+
+  /* ── Page layout ───────────────────────────────────────── */
+  .page {
+    @apply max-w-[1080px] mx-auto px-5 pt-[80px] pb-10;
+  }
+
+  /* ── Product badges ────────────────────────────────────── */
+  .badge {
+    @apply absolute top-2 left-2 text-[9px] font-display font-semibold
+           tracking-[0.12em] px-2 py-0.5 rounded-[2px] uppercase;
+  }
+  .badge-TOP     { @apply bg-green text-ivory; }
+  .badge-NUEVO   { @apply bg-accent text-white; }
+  .badge-PREMIUM { @apply bg-navy text-gold-soft; }
+  .badge-BAJO    { @apply bg-accent-soft text-risk; }
+  .badge-AGOTADO { @apply bg-risk-soft text-risk; }
+
+  /* ── Progress bar ──────────────────────────────────────── */
+  .progress-track {
+    @apply w-full h-1.5 bg-rule rounded-full overflow-hidden;
+  }
+  .progress-bar {
+    @apply h-full bg-green rounded-full transition-all duration-500;
+  }
+
+  /* ── Status pill ───────────────────────────────────────── */
+  .pill {
+    @apply inline-flex items-center text-[10px] font-display font-semibold
+           tracking-[0.08em] uppercase px-2 py-0.5 rounded-[2px];
+  }
+  .pill-ok      { @apply bg-ok-soft text-ok; }
+  .pill-proc    { @apply bg-gold-soft text-ink-soft; }
+  .pill-risk    { @apply bg-risk-soft text-risk; }
+
+  /* ── Segment dot ───────────────────────────────────────── */
+  .seg-dot {
+    @apply inline-flex items-center justify-center w-5 h-5 rounded-full
+           text-[10px] font-bold font-display;
+  }
+  .seg-dot-A { @apply bg-green text-ivory; }
+  .seg-dot-B { @apply bg-green-soft text-ivory; }
+  .seg-dot-C { @apply bg-rule text-ink-soft; }
+
+  /* ── Cupo / quota card ─────────────────────────────────── */
+  .cupo-card {
+    @apply bg-green text-ivory rounded-card p-5 flex flex-col gap-3;
+  }
+
+  /* ── Alert strip ───────────────────────────────────────── */
+  .alert-strip {
+    @apply bg-risk-soft border-l-4 border-risk rounded-r-card p-4;
+  }
+  .alert-strip-gray {
+    @apply bg-ivory border-l-4 border-rule rounded-r-card p-4;
+  }
+}
